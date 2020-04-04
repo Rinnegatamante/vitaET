@@ -1,0 +1,64 @@
+#
+# Project specific
+#
+/build*/
+/project
+/obj
+/doc
+/Makefile
+/*.make
+CMakeLists.txt.user
+etmain/ui/git_version.h
+
+#
+# OS specific
+#
+
+# Linux/KDE
+*~
+*.sh
+!/misc/*.sh
+/.directory
+*.kdev4
+
+# Mac
+.DS_STORE
+
+# Windows
+Thumbs.db
+win_resource.aps
+
+#
+# Editor specific
+#
+*.bak
+
+# Eclipse
+/.project
+/.settings
+
+# CDT-specific
+/.cproject
+
+# CTags
+.tags*
+
+# SublimeText
+*.sublime-workspace
+*.sublime-project
+
+# Clion
+.idea/
+/cmake-build-*
+
+# Visual Studio 2017
+# CMakeSettings.json
+/.vs/*
+!/.vs/launch.vs.json
+
+# Visual Studio Code
+/.vscode/
+
+# Do not under any circumstances ignore these
+!/easybuild.sh
+!/easybuild.bat
