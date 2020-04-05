@@ -74,6 +74,9 @@ Sys_DefaultHomePath
 */
 char *Sys_DefaultHomePath(void)
 {
+	if (homePath[0] == 0) {
+		sprintf(homePath, "ux0:data/ETLegacy/home");
+	}
 	return homePath;
 }
 

@@ -4237,9 +4237,9 @@ static void FS_Startup(const char *gameName)
 	// clients: don't start if base == home, so downloads won't overwrite original files! DO NOT CHANGE!
 	//if (FS_PathCmp(fs_homepath->string, fs_basepath->string) == 0)
 //	if (FS_IsSamePath(fs_homepath->string, fs_basepath->string))
-	{
-		Com_Error(ERR_FATAL, "FS_Startup: fs_homepath and fs_basepath are equal - set different paths!");
-	}
+//	{
+//		Com_Error(ERR_FATAL, "FS_Startup: fs_homepath and fs_basepath are equal - set different paths!");
+//	}
 
 #ifdef FEATURE_GETTEXT
 	// only translate legacy mod
