@@ -56,7 +56,7 @@ extern uint16_t *indices;
 
 #ifdef FEATURE_RENDERER_GLES
 #   define qglMultiTexCoord2fARB(t, s)                             glMultiTexCoord4f(t, s, 0, 1.0f)
-#   define qglActiveTextureARB                                     glActiveTexture
+#   define qglActiveTextureARB                                     0//glActiveTexture
 #   define qglClientActiveTextureARB                               glClientActiveTexture
 #else
 #   define qglMultiTexCoord2fARB                                   glMultiTexCoord2fARB

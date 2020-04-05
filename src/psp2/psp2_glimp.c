@@ -188,6 +188,8 @@ static void GLimp_InitCvars(void)
 
 void GLimp_Init(glconfig_t *glConfig, windowContext_t *context)
 {
+	Ren_Print("Initializing vitaGL\n");
+	GLimp_InitCvars();
 	
 	if (r_mode->integer < 0) r_mode->integer = 3;
 	
