@@ -294,17 +294,20 @@ from executable path, then fs_basepath.
 
 void *Sys_LoadDll(const char *name, qboolean useSystemLib) {
     void *dllhandle = NULL;
-
-	if(!Sys_DllExtension(name))
+	
+	char full_lib[128];
+	sprintf(full_lib, "%s.mp.arm.suprx", name);
+	
+	if(!Sys_DllExtension(full_lib))
 	{
-		Com_Printf("Refusing to attempt to load library \"%s\": Extension not allowed.\n", name);
+		Com_Printf("Refusing to attempt to load library \"%s\": Extension not allowed.\n", full_lib);
 		return NULL;
 	}
 	
 	if(useSystemLib)
 	{
-		Com_Printf("Trying to load \"%s\"...\n", name);
-		dllhandle = Sys_LoadLibrary(name);
+		Com_Printf("Trying to load \"%s\"...\n", full_lib);
+		dllhandle = Sys_LoadLibrary(full_lib);
 	}
 
 	if(!dllhandle)
@@ -318,15 +321,15 @@ void *Sys_LoadDll(const char *name, qboolean useSystemLib) {
 		if(!*topDir)
 			topDir = ".";
 
-		len = Com_sprintf(libPath, sizeof(libPath), "%s%c%s", topDir, PATH_SEP, name);
+		len = Com_sprintf(libPath, sizeof(libPath), "%s%c%s", topDir, PATH_SEP, full_lib);
 		if(len < sizeof(libPath))
 		{
-			Com_Printf("Trying to load \"%s\" from \"%s\"...\n", name, topDir);
+			Com_Printf("Trying to load \"%s\" from \"%s\"...\n", full_lib, topDir);
 			dllhandle = Sys_LoadLibrary(libPath);
 		}
 		else
 		{
-			Com_Printf("Skipping trying to load \"%s\" from \"%s\", file name is too long.\n", name, topDir);
+			Com_Printf("Skipping trying to load \"%s\" from \"%s\", file name is too long.\n", full_lib, topDir);
 		}
 
 		if(!dllhandle)
@@ -338,20 +341,20 @@ void *Sys_LoadDll(const char *name, qboolean useSystemLib) {
 			
 			if(FS_FilenameCompare(topDir, basePath))
 			{
-				len = Com_sprintf(libPath, sizeof(libPath), "%s%c%s", basePath, PATH_SEP, name);
+				len = Com_sprintf(libPath, sizeof(libPath), "%s%c%s", basePath, PATH_SEP, full_lib);
 				if(len < sizeof(libPath))
 				{
-					Com_Printf("Trying to load \"%s\" from \"%s\"...\n", name, basePath);
+					Com_Printf("Trying to load \"%s\" from \"%s\"...\n", full_lib, basePath);
 					dllhandle = Sys_LoadLibrary(libPath);
 				}
 				else
 				{
-					Com_Printf("Skipping trying to load \"%s\" from \"%s\", file name is too long.\n", name, basePath);
+					Com_Printf("Skipping trying to load \"%s\" from \"%s\", file name is too long.\n", full_lib, basePath);
 				}
 			}
 			
 			if(!dllhandle)
-				Com_Printf("Loading \"%s\" failed\n", name);
+				Com_Printf("Loading \"%s\" failed\n", full_lib);
 		}
 	}
 	
@@ -372,20 +375,21 @@ void *Sys_LoadGameDll(const char *name, qboolean extract,
 	void *libHandle;
 	void (*dllEntry)(intptr_t (*syscallptr)(intptr_t, ...));
 
-	assert(name);
+	char full_lib[128];
+	sprintf(full_lib, "%s.mp.arm.suprx", name);
 
-	if(!Sys_DllExtension(name))
+	if(!Sys_DllExtension(full_lib))
 	{
-		Com_Printf("Refusing to attempt to load library \"%s\": Extension not allowed.\n", name);
+		Com_Printf("Refusing to attempt to load library \"%s\": Extension not allowed.\n", full_lib);
 		return NULL;
 	}
 
-	Com_DPrintf( "Loading DLL file: %s\n", name);
-	libHandle = Sys_LoadLibrary(name);
+	Com_DPrintf( "Loading DLL file: %s\n", full_lib);
+	libHandle = Sys_LoadLibrary(full_lib);
 
 	if(!libHandle)
 	{
-		Com_Printf("Sys_LoadGameDll(%s) failed:\n\"%s\"\n", name, Sys_LibraryError());
+		Com_Printf("Sys_LoadGameDll(%s) failed:\n\"%s\"\n", full_lib, Sys_LibraryError());
 		return NULL;
 	}
 
@@ -394,13 +398,13 @@ void *Sys_LoadGameDll(const char *name, qboolean extract,
 
 	if ( !*entryPoint || !dllEntry )
 	{
-		Com_Printf ( "Sys_LoadGameDll(%s) failed to find vmMain function:\n\"%s\" !\n", name, Sys_LibraryError( ) );
+		Com_Printf ( "Sys_LoadGameDll(%s) failed to find vmMain function:\n\"%s\" !\n", full_lib, Sys_LibraryError( ) );
 		Sys_UnloadLibrary(libHandle);
 
 		return NULL;
 	}
 
-	Com_DPrintf ( "Sys_LoadGameDll(%s) found vmMain function at %p\n", name, *entryPoint );
+	Com_DPrintf ( "Sys_LoadGameDll(%s) found vmMain function at %p\n", full_lib, *entryPoint );
 	dllEntry( systemcalls );
 
 	return libHandle;

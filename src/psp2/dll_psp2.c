@@ -85,7 +85,7 @@ void *dlopen( const char *name, int flag )
 	if( old ) { old->refcnt++; return old; }
 
 	char fullpath[128];
-	snprintf( fullpath, sizeof(fullpath), name );
+	sprintf(fullpath, "ux0:data/ETLegacy/etmain/%s", name);
 
 	modarg.imports = sys_exports;
 	modarg.exports = NULL;
