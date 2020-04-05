@@ -378,7 +378,7 @@ void G_ExplodeMissile(gentity_t *ent)
 			int       i, num, touch[MAX_GENTITIES];
 			gentity_t *hit;
 
-			ent->free = NULL; // no defused tidy up if we exploded
+			ent->fre3 = NULL; // no defused tidy up if we exploded
 
 			// made this the actual bounding box of dynamite instead of range
 			VectorAdd(ent->r.currentOrigin, ent->r.mins, mins);
@@ -1161,7 +1161,7 @@ void DynaFree(gentity_t *self)
 	vec3_t    org;
 	gentity_t *hit;
 
-	self->free = NULL;
+	self->fre3 = NULL;
 
 	if (self->think != G_ExplodeMissile)
 	{
@@ -1438,7 +1438,7 @@ void G_FreeSatchel(gentity_t *ent)
 {
 	gentity_t *other;
 
-	ent->free = NULL;
+	ent->fre3 = NULL;
 
 	if (ent->s.eType != ET_MISSILE)
 	{

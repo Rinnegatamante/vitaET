@@ -783,7 +783,7 @@ void G_InitGentity(gentity_t *e)
 	e->s.number   = e - g_entities;
 	e->r.ownerNum = ENTITYNUM_NONE;
 	e->nextthink  = 0;
-	e->free       = NULL;
+	e->fre3       = NULL;
 
 	// init scripting
 	e->scriptStatus.scriptEventIndex = -1;
@@ -897,9 +897,9 @@ void G_FreeEntity(gentity_t *ent)
 	Bot_Event_EntityDeleted(ent);
 #endif
 
-	if (ent->free)
+	if (ent->fre3)
 	{
-		ent->free(ent);
+		ent->fre3(ent);
 	}
 
 	trap_UnlinkEntity(ent);       // unlink from world

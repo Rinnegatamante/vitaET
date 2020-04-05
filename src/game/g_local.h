@@ -383,7 +383,7 @@ struct gentity_s
 	vec3_t gDeltaBack;
 
 	int nextthink;
-	void (*free)(gentity_t *self);
+	void (*fre3)(gentity_t *self);
 	void (*think)(gentity_t *self);
 	void (*reached)(gentity_t *self);           ///< movers call this when hitting endpoint
 	void (*blocked)(gentity_t *self, gentity_t *other);

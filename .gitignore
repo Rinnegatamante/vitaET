@@ -3,15 +3,15 @@
 *.elf
 *.velf
 *.vpk
+*.suprx
+*.bin
 
 #
 # Project specific
 #
-/build*/
 /project
 /obj
 /doc
-/Makefile
 /*.make
 CMakeLists.txt.user
 etmain/ui/git_version.h

@@ -589,7 +589,7 @@ static cvarTable_t cvarTable[] =
 
 	{ &cg_optimizePrediction,     "cg_optimizePrediction",     "1",           CVAR_ARCHIVE,                 0 }, // unlagged optimized prediction
 
-	{ &cg_scoreboard,             "cg_scoreboard",             "0",           CVAR_ARCHIVE,                 0 },
+//	{ &cg_scoreboard,             "cg_scoreboard",             "0",           CVAR_ARCHIVE,                 0 },
 
 	{ &cg_quickchat,              "cg_quickchat",              "0",           CVAR_ARCHIVE,                 0 },
 
