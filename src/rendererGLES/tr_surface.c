@@ -624,32 +624,15 @@ void RB_SurfaceBeam(void)
 	qglColor3f(1, 0, 0);
 
 	// OpenGLES implementation 
-	GLboolean text  = qglIsEnabled(GL_TEXTURE_COORD_ARRAY);
-	GLboolean glcol = qglIsEnabled(GL_COLOR_ARRAY);
-	if (glcol)
-	{
-		qglDisableClientState(GL_COLOR_ARRAY);
+	float *pPos = gVertexBuffer;
+	for ( i = 0; i <= NUM_BEAM_SEGS; i++ ) {
+		memcpy(gVertexBuffer, start_points[ i % NUM_BEAM_SEGS], sizeof(vec3_t));
+		gVertexBuffer+=3;
+		memcpy(gVertexBuffer, end_points[ i % NUM_BEAM_SEGS], sizeof(vec3_t));
+		gVertexBuffer+=3;
 	}
-	if (text)
-	{
-		qglDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	}
-	GLfloat vtx[NUM_BEAM_SEGS * 6 + 6];
-	for (i = 0; i <= NUM_BEAM_SEGS; i++)
-	{
-		Com_Memcpy(vtx + i * 6, start_points[i % NUM_BEAM_SEGS], sizeof(GLfloat) * 3);
-		Com_Memcpy(vtx + i * 6 + 3, end_points[i % NUM_BEAM_SEGS], sizeof(GLfloat) * 3);
-	}
-	qglVertexPointer(3, GL_FLOAT, 0, vtx);
-	qglDrawArrays(GL_TRIANGLE_STRIP, 0, NUM_BEAM_SEGS * 2 + 2);
-	if (glcol)
-	{
-		qglEnableClientState(GL_COLOR_ARRAY);
-	}
-	if (text)
-	{
-		qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	}
+	vglVertexPointerMapped(pPos);
+	vglDrawObjects(GL_TRIANGLE_STRIP, (NUM_BEAM_SEGS + 1) * 2, GL_TRUE);
 }
 
 //================================================================================
@@ -1585,7 +1568,7 @@ void RB_SurfaceAxis(void)
 	GL_Bind(tr.whiteImage);
 	GL_State(GLS_DEFAULT);
 	qglLineWidth(3);
-	GLfloat col[] =
+	GLfloat clrs[] =
 	{
 		1, 0, 0, 1,
 		1, 0, 0, 1,
@@ -1594,7 +1577,7 @@ void RB_SurfaceAxis(void)
 		0, 0, 1, 1,
 		0, 0, 1, 1
 	};
-	GLfloat vtx[] =
+	GLfloat verts[] =
 	{
 		0,  0,  0,
 		16, 0,  0,
@@ -1603,27 +1586,11 @@ void RB_SurfaceAxis(void)
 		0,  0,  0,
 		0,  0,  16
 	};
-	GLboolean text  = qglIsEnabled(GL_TEXTURE_COORD_ARRAY);
-	GLboolean glcol = qglIsEnabled(GL_COLOR_ARRAY);
-	if (text)
-	{
-		qglDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	}
-	if (!glcol)
-	{
-		qglEnableClientState(GL_COLOR_ARRAY);
-	}
-	qglColorPointer(4, GL_UNSIGNED_BYTE, 0, col);
-	qglVertexPointer(3, GL_FLOAT, 0, vtx);
-	qglDrawArrays(GL_LINES, 0, 6);
-	if (text)
-	{
-		qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	}
-	if (!glcol)
-	{
-		qglDisableClientState(GL_COLOR_ARRAY);
-	}
+	glEnableClientState(GL_COLOR_ARRAY);
+	vglVertexPointer(3, GL_FLOAT, 0, 6, verts);
+	vglColorPointer(4, GL_FLOAT, 0, 6, clrs);
+	vglDrawObjects(GL_LINES, 6, GL_TRUE);
+	glDisableClientState(GL_COLOR_ARRAY);
 	qglLineWidth(1);
 }
 

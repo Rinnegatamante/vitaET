@@ -200,16 +200,6 @@ void Sys_Quit( void )
 
 /*
 =================
-Sys_GetProcessorFeatures
-=================
-*/
-cpuFeatures_t Sys_GetProcessorFeatures( void )
-{
-	return (cpuFeatures_t) 0;
-}
-
-/*
-=================
 Sys_Init
 =================
 */
@@ -375,7 +365,7 @@ Sys_LoadGameDll
 Used to load a development dll instead of a virtual machine
 =================
 */
-void *Sys_LoadGameDll(const char *name,
+void *Sys_LoadGameDll(const char *name, qboolean extract,
 	intptr_t (QDECL **entryPoint)(intptr_t, ...),
 	intptr_t (*systemcalls)(intptr_t, ...))
 {
@@ -428,11 +418,10 @@ void Sys_ParseArgs( int argc, char **argv )
 		if( !strcmp( argv[1], "--version" ) ||
 				!strcmp( argv[1], "-v" ) )
 		{
-			const char* date = PRODUCT_DATE;
 #ifdef DEDICATED
-			fprintf( stdout, Q3_VERSION " dedicated server (%s)\n", date );
+			fprintf( stdout, Q3_VERSION " dedicated server \n" );
 #else
-			fprintf( stdout, Q3_VERSION " client (%s)\n", date );
+			fprintf( stdout, Q3_VERSION " client \n" );
 #endif
 			Sys_Exit( 0 );
 		}
@@ -456,12 +445,10 @@ void Sys_SigHandler( int signal )
 	else
 	{
 		signalcaught = qtrue;
-		VM_Forced_Unload_Start();
 #ifndef DEDICATED
-		CL_Shutdown(va("Received signal %d", signal), qtrue, qtrue);
+		CL_Shutdown();
 #endif
 		SV_Shutdown(va("Received signal %d", signal) );
-		VM_Forced_Unload_Done();
 	}
 
 	if( signal == SIGTERM || signal == SIGINT )
@@ -470,12 +457,67 @@ void Sys_SigHandler( int signal )
 		Sys_Exit( 2 );
 }
 
+void Sys_SnapVector(float *v)
+{
+	v[0] = rint(v[0]);
+	v[1] = rint(v[1]);
+	v[2] = rint(v[2]);
+}
+
+/**
+ * @brief Writes pid to profile or to the homepath root if running a server
+ * @return qtrue  if pid file successfully created
+ *         otherwise qfalse if it wasn't possible to create a new pid file
+ */
+qboolean Sys_WritePIDFile(void)
+{
+	fileHandle_t f;
+
+	// First, check if the pid file is already there
+	if (FS_FileInPathExists(com_pidfile->string))
+	{
+		// TODO: check if we are hijacking live pid file
+		/*
+		FS_FOpenFileRead(com_pidfile->string, &f, qtrue);
+		if(Sys_PIDIsRunning(pid))
+		{
+		    Com_Printf("WARNING: another instance of ET:L is using this path!\n");
+		    return qfalse;
+		}
+		*/
+		if (FS_Delete(com_pidfile->string) == 0) // stale pid from previous run
+		{
+			Com_Printf("WARNING: unable to delete old PID file!\n");
+		}
+	}
+
+	f = FS_FOpenFileWrite(com_pidfile->string);
+	if (f < 0)
+	{
+		Com_Printf("WARNING: can't write PID file!\n");
+		return qfalse;
+	}
+	else
+	{
+		Com_Printf("Creating PID file '%s'\n", com_pidfile->string);
+	}
+
+	FS_Printf(f, "%d", com_pid->integer);
+
+	FS_FCloseFile(f);
+
+	// track profile changes
+	Com_TrackProfile(com_pidfile->string);
+
+	return qtrue;
+}
+
 /*
 =================
 main
 =================
 */
-int rtcw_main( int argc, char **argv )
+int wolfet_main( int argc, char **argv )
 {
 	int   i;
 	char  commandLine[ MAX_STRING_CHARS ] = { 0 };
@@ -485,17 +527,9 @@ int rtcw_main( int argc, char **argv )
 	// Set the initial time base
 	Sys_Milliseconds( );
 
-	sceIoMkdir(DEFAULT_BASEDIR, 777);
-	Sys_SetBinaryPath( DEFAULT_BASEDIR );
-	Sys_SetDefaultInstallPath( DEFAULT_BASEDIR );
-	
-	sceAppUtilInit(&(SceAppUtilInitParam){}, &(SceAppUtilBootParam){});
-	SceAppUtilAppEventParam eventParam;
-	memset(&eventParam, 0, sizeof(SceAppUtilAppEventParam));
-	sceAppUtilReceiveAppEvent(&eventParam);
-	if (eventParam.type == 0x05){
-		sceAppMgrLoadExec("app0:/mp_eboot.bin", NULL, NULL);
-	}
+	sceIoMkdir("ux0:data/ETLegacy", 777);
+	Sys_SetBinaryPath( "ux0:data/ETLegacy" );
+	Sys_SetDefaultInstallPath( "ux0:data/ETLegacy" );
 
 	CON_Init( );
 	Com_Init( commandLine );
@@ -512,7 +546,7 @@ int rtcw_main( int argc, char **argv )
 	return 0;
 }
 
-extern void IN_Init( void *windowData );
+extern void IN_Init();
 
 int main(int argc, char **argv) {
 	
@@ -523,10 +557,10 @@ int main(int argc, char **argv) {
 	scePowerSetGpuXbarClockFrequency(166);
 	
 	// Starting input
-	IN_Init(NULL);
+	IN_Init();
 	
-	// We need a bigger stack to run Quake 3, so we create a new thread with a proper stack size
-	SceUID main_thread = sceKernelCreateThread("RTCW", rtcw_main, 0x40, 0x200000, 0, 0, NULL);
+	// We need a bigger stack to run Wolf:ET, so we create a new thread with a proper stack size
+	SceUID main_thread = sceKernelCreateThread("Wolf:ET", wolfet_main, 0x40, 0x200000, 0, 0, NULL);
 	if (main_thread >= 0){
 		sceKernelStartThread(main_thread, 0, NULL);
 		sceKernelWaitThreadEnd(main_thread, NULL, NULL);

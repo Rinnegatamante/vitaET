@@ -46,6 +46,10 @@
 #include "zlib.h"
 #endif
 
+#ifndef ETLEGACY_VERSION_SHORT
+#define ETLEGACY_VERSION_SHORT "2.60b"
+#endif
+
 #ifdef USE_RENDERER_DLOPEN
 cvar_t *cl_renderer;
 #endif

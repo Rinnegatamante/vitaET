@@ -36,6 +36,10 @@
 #ifndef INCLUDE_CLIENT_H
 #define INCLUDE_CLIENT_H
 
+#ifndef ETLEGACY_VERSION_INT
+#define ETLEGACY_VERSION_INT 2076
+#endif
+
 #include "../qcommon/q_shared.h"
 #include "../qcommon/qcommon.h"
 #include "../renderercommon/tr_public.h"

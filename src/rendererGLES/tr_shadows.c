@@ -87,7 +87,7 @@ void R_RenderShadowEdges(void)
 	int c, c2;
 	int j, k;
 	int i2;
-	// int c_edges = 0, c_rejected = 0;  // TODO: remove ?
+	//int c_edges = 0, c_rejected = 0;  // TODO: remove ?
 	int hit[2];
 
 	// an edge is NOT a silhouette edge if its face doesn't face the light,
@@ -122,26 +122,22 @@ void R_RenderShadowEdges(void)
 			// triangle, it is a sil edge
 			if (hit[1] == 0)
 			{
-				// OpenGLES implementation 
-				// A single drawing call is better than many. So I prefer a singe TRIANGLES call than many TRAINGLE_STRIP call
-				// even if it seems less efficiant, it's faster on the PANDORA
-				indexes[idx++] = i;
-				indexes[idx++] = i + tess.numVertexes;
-				indexes[idx++] = i2;
-				indexes[idx++] = i2;
-				indexes[idx++] = i + tess.numVertexes;
-				indexes[idx++] = i2 + tess.numVertexes;
-				// c_edges++;
+				float vertices[] = {
+					tess.xyz[i][0], tess.xyz[i][1], tess.xyz[i][2],
+					tess.xyz[i + tess.numVertexes][0], tess.xyz[i + tess.numVertexes][1], tess.xyz[i + tess.numVertexes][2],
+					tess.xyz[i2][0], tess.xyz[i2][1], tess.xyz[i2][2],
+					tess.xyz[i2 + tess.numVertexes][0], tess.xyz[i2 + tess.numVertexes][1], tess.xyz[i2 + tess.numVertexes][2]
+				};
+				vglVertexPointer( 3, GL_FLOAT, 0, 4, vertices );
+				vglDrawObjects(GL_TRIANGLE_STRIP, 4, GL_TRUE);
+				//c_edges++;
 			}
-			/*
-			else
+			/*else
 			{
 			    c_rejected++;
-			}
-			*/
+			}*/
 		}
 	}
-	qglDrawElements(GL_TRIANGLES, idx, GL_UNSIGNED_SHORT, indexes);
 }
 
 /**
@@ -295,33 +291,14 @@ void RB_ShadowFinish(void)
 	GL_State(GLS_DEPTHMASK_TRUE | GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_ZERO);
 
 	// OpenGLES implementation 
-	GLboolean text  = qglIsEnabled(GL_TEXTURE_COORD_ARRAY);
-	GLboolean glcol = qglIsEnabled(GL_COLOR_ARRAY);
-	if (text)
-	{
-		qglDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	}
-	if (glcol)
-	{
-		qglDisableClientState(GL_COLOR_ARRAY);
-	}
-	GLfloat vtx[] =
-	{
-		-100, 100,  -10,
-		100,  100,  -10,
-		100,  -100, -10,
+	float vertices[] = {
+		-100,  100, -10,
+		 100,  100, -10,
+		 100, -100, -10,
 		-100, -100, -10
 	};
-	qglVertexPointer(3, GL_FLOAT, 0, vtx);
-	qglDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-	if (text)
-	{
-		qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	}
-	if (glcol)
-	{
-		qglEnableClientState(GL_COLOR_ARRAY);
-	}
+	vglVertexPointer( 3, GL_FLOAT, 0, 4, vertices );
+	vglDrawObjects(GL_TRIANGLE_FAN, 4, GL_TRUE);
 
 	qglColor4f(1, 1, 1, 1);
 	qglDisable(GL_STENCIL_TEST);

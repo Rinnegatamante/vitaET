@@ -42,7 +42,7 @@
 #include "../renderercommon/tr_common.h"
 #include "../renderercommon/qgl.h"
 
-#include "GLES/glext.h"
+//#include "GLES/glext.h"
 #ifndef GL_RGBA4
 #define GL_RGBA4                0x8056
 #endif

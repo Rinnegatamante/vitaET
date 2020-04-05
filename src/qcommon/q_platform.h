@@ -334,6 +334,15 @@
 
 //===========================================================================
 
+#ifdef __PSP2__
+
+#define OS_STRING "vita"
+#define ID_INLINE inline
+#define PATH_SEP '/'
+#define DLL_EXT ".suprx"
+#define Q3_LITTLE_ENDIAN
+#endif
+
 //catch missing defines in above blocks
 #if !defined(OS_STRING)
 #error "Operating system not supported"

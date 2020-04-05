@@ -69,10 +69,8 @@ qboolean SNDDMA_Init(void)
 	dma.speed = SAMPLE_RATE;
 	dma.channels = 1;
 	dma.samples = AUDIOSIZE / 2;
-	dma.fullsamples = dma.samples / dma.channels;
 	dma.submission_chunk = 1;
 	dma.buffer = audiobuffer = malloc(AUDIOSIZE);
-	dma.isfloat = 0;
 	
 	tickRate = 1.0f / sceRtcGetTickResolution();
 	

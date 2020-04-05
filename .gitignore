@@ -1,3 +1,9 @@
+*.o
+*.sfo
+*.elf
+*.velf
+*.vpk
+
 #
 # Project specific
 #

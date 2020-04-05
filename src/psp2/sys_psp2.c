@@ -74,21 +74,6 @@ Sys_DefaultHomePath
 */
 char *Sys_DefaultHomePath(void)
 {
-	char *p1;
-
-	if( !*homePath && com_homepath != NULL )
-	{
-		if( ( p1 = getenv( "HOME" ) ) != NULL )
-		{
-			Com_sprintf(homePath, sizeof(homePath), "%s%c", p1, PATH_SEP);
-
-			if(com_homepath->string[0])
-				Q_strcat(homePath, sizeof(homePath), com_homepath->string);
-			else
-				Q_strcat(homePath, sizeof(homePath), HOMEPATH_NAME_UNIX);
-		}
-	}
-
 	return homePath;
 }
 
@@ -284,7 +269,7 @@ Sys_Cwd
 ==================
 */
 char *Sys_Cwd(void) {
-    return DEFAULT_BASEDIR;
+    return "ux0:data/ETLegacy";
 }
 
 /*
@@ -359,7 +344,7 @@ void Sys_ListFilteredFiles( const char *basedir, char *subdirs, char *filter, ch
 Sys_ListFiles
 ==================
 */
-char **Sys_ListFiles( const char *directory, const char *extension, char *filter, int *numfiles, qboolean wantsubs )
+char **Sys_ListFiles( const char *directory, const char *extension, const char *filter, int *numfiles, qboolean wantsubs )
 {
 	struct dirent *d;
 	DIR           *fdir;
@@ -880,7 +865,7 @@ int Sys_PID( void )
 Sys_PIDIsRunning
 ==============
 */
-qboolean Sys_PIDIsRunning( int pid )
+qboolean Sys_PIDIsRunning(unsigned int pid )
 {
 	return kill( pid, 0 ) == 0;
 }
@@ -924,15 +909,6 @@ qboolean Sys_DllExtension( const char *name ) {
 	}
 
 	return qfalse;
-}
-
-/*
-==============
-Sys_GetDLLName
-==============
-*/
-char* Sys_GetDLLName( const char *name ) {
-	return va("%s.sp." ARCH_STRING DLL_EXT, name);
 }
 
 /*
@@ -987,7 +963,7 @@ void Sys_StartProcess( char *cmdline, qboolean doexit ) {
 Sys_OpenURL
 =================
 */
-void Sys_OpenURL( char *url, qboolean doexit ) {
+void Sys_OpenURL(const char *url, qboolean doexit ) {
 	char *basepath, *homepath, *pwdpath;
 	char fname[20];
 	char fn[MAX_OSPATH];

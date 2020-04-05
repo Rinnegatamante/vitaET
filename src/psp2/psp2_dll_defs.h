@@ -19,7 +19,7 @@ extern "C"
 
 #include "psp2_dll_imports.h"
 
-#define DEFAULT_BASEDIR "ux0:/data/iortcw"
+#define DEFAULT_BASEDIR "ux0:/data/ETLegacy"
 
 #ifndef PATH_MAX
 #define PATH_MAX 256

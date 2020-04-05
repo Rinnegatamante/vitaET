@@ -256,6 +256,12 @@ static qboolean Sys_StringToSockaddr(const char *s, struct sockaddr *sadr, int s
 	return qtrue;
 }
 
+qboolean NET_IsLocalAddressString(const char *address)
+{
+	// see NET_AdrToString & make fail safe (see UI)
+	return !Q_stricmp(address, "loopback") || !Q_stricmp(address, "localhost");
+}
+
 /*
 =============
 Sys_SockaddrToString

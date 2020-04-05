@@ -300,7 +300,7 @@ void GL_CheckErrors(void)
  */
 byte *RB_ReadPixels(int x, int y, int width, int height, size_t *offset, int *padlen)
 {
-	byte  *buffer, *bufstart;
+	/*byte  *buffer, *bufstart;
 	int   padwidth, linelen;
 	GLint packAlign;
 
@@ -318,7 +318,8 @@ byte *RB_ReadPixels(int x, int y, int width, int height, size_t *offset, int *pa
 	*offset = bufstart - buffer;
 	*padlen = padwidth - linelen;
 
-	return buffer;
+	return buffer;*/
+	return NULL;
 }
 
 /*
@@ -626,7 +627,8 @@ void R_ScreenshotFilename(int lastNumber, char *fileName, char *ext)
  */
 const void *RB_TakeVideoFrameCmd(const void *data)
 {
-	const videoFrameCommand_t *cmd;
+	return NULL;
+	/*const videoFrameCommand_t *cmd;
 	byte                      *cBuf;
 	size_t                    memcount, linelen;
 	int                       padwidth, avipadwidth, padlen, avipadlen;
@@ -701,7 +703,7 @@ const void *RB_TakeVideoFrameCmd(const void *data)
 		ri.CL_WriteAVIVideoFrame(cmd->encodeBuffer, avipadwidth * cmd->height);
 	}
 
-	return (const void *)(cmd + 1);
+	return (const void *)(cmd + 1);*/
 }
 
 /**
@@ -883,20 +885,20 @@ void GL_SetDefaultState(void)
 
 	// initialize downstream texture unit if we're running
 	// in a multitexture environment
-	if (qglActiveTextureARB)
+	/*if (qglActiveTextureARB)
 	{
 		GL_SelectTexture(1);
 		GL_TextureMode(r_textureMode->string);
 		GL_TexEnv(GL_MODULATE);
 		qglDisable(GL_TEXTURE_2D);
 		GL_SelectTexture(0);
-	}
+	}*/
 
 	qglEnable(GL_TEXTURE_2D);
 	GL_TextureMode(r_textureMode->string);
 	GL_TexEnv(GL_MODULATE);
 
-	qglShadeModel(GL_SMOOTH);
+	//qglShadeModel(GL_SMOOTH);
 	qglDepthFunc(GL_LEQUAL);
 
 	// the vertex array is always enabled, but the color and texture
@@ -906,8 +908,8 @@ void GL_SetDefaultState(void)
 	// make sure our GL state vector is set correctly
 	glState.glStateBits = GLS_DEPTHTEST_DISABLE | GLS_DEPTHMASK_TRUE;
 
-	qglPixelStorei(GL_PACK_ALIGNMENT, 1);
-	qglPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	//qglPixelStorei(GL_PACK_ALIGNMENT, 1);
+	//qglPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	qglDepthMask(GL_TRUE);
 	qglDisable(GL_DEPTH_TEST);
 	qglEnable(GL_SCISSOR_TEST);

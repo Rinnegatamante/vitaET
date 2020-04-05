@@ -131,11 +131,11 @@ typedef struct
 textureMode_t modes[] =
 {
 	{ "GL_NEAREST",                GL_NEAREST,                GL_NEAREST },
-	{ "GL_LINEAR",                 GL_LINEAR,                 GL_LINEAR  },
+	{ "GL_LINEAR",                 GL_LINEAR,                 GL_LINEAR  }/*,
 	{ "GL_NEAREST_MIPMAP_NEAREST", GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST },
 	{ "GL_LINEAR_MIPMAP_NEAREST",  GL_LINEAR_MIPMAP_NEAREST,  GL_LINEAR  },
 	{ "GL_NEAREST_MIPMAP_LINEAR",  GL_NEAREST_MIPMAP_LINEAR,  GL_NEAREST },
-	{ "GL_LINEAR_MIPMAP_LINEAR",   GL_LINEAR_MIPMAP_LINEAR,   GL_LINEAR  }
+	{ "GL_LINEAR_MIPMAP_LINEAR",   GL_LINEAR_MIPMAP_LINEAR,   GL_LINEAR  }*/
 };
 
 /**
@@ -772,10 +772,10 @@ static void Upload32(unsigned *data,
 			{
 				internalFormat = GL_LUMINANCE;
 			}
-			else if (r_textureBits->integer == 16)
+/*			else if (r_textureBits->integer == 16)
 			{
 				internalFormat = GL_RGB5;
-			}
+			}*/
 			else
 			{
 				internalFormat = GL_RGB;
@@ -787,10 +787,10 @@ static void Upload32(unsigned *data,
 			{
 				internalFormat = GL_LUMINANCE_ALPHA;
 			}
-			else if (r_textureBits->integer == 16)
+/*			else if (r_textureBits->integer == 16)
 			{
 				internalFormat = GL_RGBA4;
-			}
+			}*/
 			else
 			{
 				internalFormat = GL_RGBA;
@@ -825,11 +825,11 @@ static void Upload32(unsigned *data,
 	}
 	R_LightScaleTexture(scaledBuffer, scaled_width, scaled_height, !mipmap);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, (mipmap) ? GL_TRUE : GL_FALSE);
+//	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, (mipmap) ? GL_TRUE : GL_FALSE);
 
 	// and now, convert if needed and upload
 	// GLES doesn't do conversion itself, so we have to handle that
-	byte *temp;
+/*	byte *temp;
 	switch (internalFormat)
 	{
 	case GL_RGB5:
@@ -857,11 +857,11 @@ static void Upload32(unsigned *data,
         qglTexImage2D (GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, scaled_width, scaled_height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, temp);
         ri.Free(temp);
         break;
-	default:
-		internalFormat = GL_RGBA;
+	default:*/
+		//internalFormat = GL_RGBA;
 		qglTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaledBuffer);
-		break;
-	}
+//		break;
+//	}
 
 	*pUploadWidth  = scaled_width;
 	*pUploadHeight = scaled_height;
@@ -872,21 +872,22 @@ static void Upload32(unsigned *data,
 
 	if (mipmap)
 	{
-		if (textureFilterAnisotropic)
+		glGenerateMipmap(GL_TEXTURE_2D);
+		/*if (textureFilterAnisotropic)
 		{
 			qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT,
 			                 (GLint)Com_Clamp(1, maxAnisotropy, r_extMaxAnisotropy->integer));
-		}
+		}*/
 
 		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
 		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
 	}
 	else
 	{
-		if (textureFilterAnisotropic)
+		/*if (textureFilterAnisotropic)
 		{
 			qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1);
-		}
+		}*/
 
 		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

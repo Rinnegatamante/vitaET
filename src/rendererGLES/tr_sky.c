@@ -441,39 +441,29 @@ static void DrawSkySide(struct image_s *image, const int mins[2], const int maxs
 
 	// OpenGLES implementation 
 	GL_Bind(image);
-	GLfloat vtx[3 * 1024];    // arbitrary sized
-	GLfloat tex[2 * 1024];
-	int     idx;
-
-	GLboolean text  = qglIsEnabled(GL_TEXTURE_COORD_ARRAY);
-	GLboolean glcol = qglIsEnabled(GL_COLOR_ARRAY);
-	if (glcol)
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	for ( t = mins[1]+HALF_SKY_SUBDIVISIONS; t < maxs[1]+HALF_SKY_SUBDIVISIONS; t++ )
 	{
-		qglDisableClientState(GL_COLOR_ARRAY);
-	}
-	if (!text)
-	{
-		qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	}
-
-	for (t = mins[1] + HALF_SKY_SUBDIVISIONS; t < maxs[1] + HALF_SKY_SUBDIVISIONS; t++)
-	{
-		idx = 0;
-
-		for (s = mins[0] + HALF_SKY_SUBDIVISIONS; s <= maxs[0] + HALF_SKY_SUBDIVISIONS; s++)
+		float *texcoord = gTexCoordBuffer;
+		float *vertices = gVertexBuffer;
+		int numindices = 0;
+		for ( s = mins[0]+HALF_SKY_SUBDIVISIONS; s <= maxs[0]+HALF_SKY_SUBDIVISIONS; s++ )
 		{
-			Com_Memcpy(tex + idx * 2, s_skyTexCoords[t][s], sizeof(GLfloat) * 2);
-			Com_Memcpy(vtx + idx * 3, s_skyPoints[t][s], sizeof(GLfloat) * 3);
-			idx++;
-			Com_Memcpy(tex + idx * 2, s_skyTexCoords[t + 1][s], sizeof(GLfloat) * 2);
-			Com_Memcpy(vtx + idx * 3, s_skyPoints[t + 1][s], sizeof(GLfloat) * 3);
-			idx++;
+			memcpy(gTexCoordBuffer, s_skyTexCoords[t][s], sizeof(vec2_t));
+			memcpy(gVertexBuffer, s_skyPoints[t][s], sizeof(vec3_t));
+			gVertexBuffer += 3;
+			gTexCoordBuffer += 2;
+			memcpy(gTexCoordBuffer, s_skyTexCoords[t+1][s], sizeof(vec2_t));
+			memcpy(gVertexBuffer, s_skyPoints[t+1][s], sizeof(vec3_t));
+			gVertexBuffer += 3;
+			gTexCoordBuffer += 2;
+			numindices += 2;
 		}
-
-		qglVertexPointer(3, GL_FLOAT, 0, vtx);
-		qglTexCoordPointer(2, GL_FLOAT, 0, tex);
-		qglDrawArrays(GL_TRIANGLE_STRIP, 0, idx);
+		vglVertexPointerMapped(vertices);
+		vglTexCoordPointerMapped(texcoord);
+		vglDrawObjects(GL_TRIANGLE_STRIP, numindices, GL_TRUE);
 	}
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 /**
@@ -488,44 +478,36 @@ static void DrawSkySideInner(struct image_s *image, const int mins[2], const int
 
 	// OpenGLES implementation 
 	GL_Bind(image);
-	GLfloat vtx[3 * 1024];    // arbitrary sized
-	GLfloat tex[2 * 1024];
-	int     idx;
-
-	GLboolean text  = qglIsEnabled(GL_TEXTURE_COORD_ARRAY);
-	GLboolean glcol = qglIsEnabled(GL_COLOR_ARRAY);
-	if (glcol)
-	{
-		qglDisableClientState(GL_COLOR_ARRAY);
-	}
-	if (!text)
-	{
-		qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	}
+	
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	//qglDisable (GL_BLEND);
-	qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	qglEnable(GL_BLEND);
-	GL_TexEnv(GL_MODULATE);
+	qglBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	qglEnable( GL_BLEND );
+	GL_TexEnv( GL_MODULATE );
 
-	for (t = mins[1] + HALF_SKY_SUBDIVISIONS; t < maxs[1] + HALF_SKY_SUBDIVISIONS; t++)
+	for ( t = mins[1] + HALF_SKY_SUBDIVISIONS; t < maxs[1] + HALF_SKY_SUBDIVISIONS; t++ )
 	{
-		idx = 0;
-
-		for (s = mins[0] + HALF_SKY_SUBDIVISIONS; s <= maxs[0] + HALF_SKY_SUBDIVISIONS; s++)
+		float *texcoord = gTexCoordBuffer;
+		float *vertices = gVertexBuffer;
+		int numindices = 0;
+		for ( s = mins[0]+HALF_SKY_SUBDIVISIONS; s <= maxs[0]+HALF_SKY_SUBDIVISIONS; s++ )
 		{
-			Com_Memcpy(tex + idx * 2, s_skyTexCoords[t][s], sizeof(GLfloat) * 2);
-			Com_Memcpy(vtx + idx * 3, s_skyPoints[t][s], sizeof(GLfloat) * 3);
-			idx++;
-			Com_Memcpy(tex + idx * 2, s_skyTexCoords[t + 1][s], sizeof(GLfloat) * 2);
-			Com_Memcpy(vtx + idx * 3, s_skyPoints[t + 1][s], sizeof(GLfloat) * 3);
-			idx++;
+			memcpy(gTexCoordBuffer, s_skyTexCoords[t][s], sizeof(vec2_t));
+			memcpy(gVertexBuffer, s_skyPoints[t][s], sizeof(vec3_t));
+			gVertexBuffer += 3;
+			gTexCoordBuffer += 2;
+			memcpy(gTexCoordBuffer, s_skyTexCoords[t+1][s], sizeof(vec2_t));
+			memcpy(gVertexBuffer, s_skyPoints[t+1][s], sizeof(vec3_t));
+			gVertexBuffer += 3;
+			gTexCoordBuffer += 2;
+			numindices += 2;
 		}
-
-		qglVertexPointer(3, GL_FLOAT, 0, vtx);
-		qglTexCoordPointer(2, GL_FLOAT, 0, tex);
-		qglDrawArrays(GL_TRIANGLE_STRIP, 0, idx);
+		vglVertexPointerMapped(vertices);
+		vglTexCoordPointerMapped(texcoord);
+		vglDrawObjects(GL_TRIANGLE_STRIP, numindices, GL_TRUE);
 	}
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	qglDisable(GL_BLEND);
 }

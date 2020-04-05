@@ -518,8 +518,8 @@ static void GLimp_InitExtensions(void)
 	glConfig.maxActiveTextures = 1;
 #if defined(FEATURE_RENDERER_GLES)
 	GLint glint = 0;
-	qglGetIntegerv(GL_MAX_TEXTURE_UNITS, &glint);
-	glConfig.maxActiveTextures = (int)glint;
+//	qglGetIntegerv(GL_MAX_TEXTURE_UNITS, &glint);
+//	glConfig.maxActiveTextures = (int)glint;
 
 	if (glConfig.maxActiveTextures > 1)
 	{

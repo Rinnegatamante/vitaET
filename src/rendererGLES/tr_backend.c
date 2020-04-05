@@ -829,6 +829,8 @@ void RE_StretchRaw(int x, int y, int w, int h, int cols, int rows, const byte *d
 
 	// we definately want to sync every frame for the cinematics
 	qglFinish();
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
 
 	start = 0;
 	if (r_speeds->integer)
@@ -855,7 +857,7 @@ void RE_StretchRaw(int x, int y, int w, int h, int cols, int rows, const byte *d
 	{
 		tr.scratchImage[client]->width  = tr.scratchImage[client]->uploadWidth = cols;
 		tr.scratchImage[client]->height = tr.scratchImage[client]->uploadHeight = rows;
-		qglTexImage2D(GL_TEXTURE_2D, 0, 3, cols, rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		qglTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, cols, rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -867,7 +869,7 @@ void RE_StretchRaw(int x, int y, int w, int h, int cols, int rows, const byte *d
 		{
 			// otherwise, just subimage upload it so that drivers can tell we are going to be changing
 			// it and don't try and do a texture compression
-			qglTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, cols, rows, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			qglTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, cols, rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		}
 	}
 
@@ -883,42 +885,22 @@ void RE_StretchRaw(int x, int y, int w, int h, int cols, int rows, const byte *d
 	qglColor3f(tr.identityLight, tr.identityLight, tr.identityLight);
 
 	// OpenGLES implementation
-	GLfloat tex[] =
-	{
-		0.5f / cols,          0.5f / rows,
-		(cols - 0.5f) / cols, 0.5f / rows,
-		(cols - 0.5f) / cols, (rows - 0.5f) / rows,
-		0.5f / cols,          (rows - 0.5f) / rows
+	float texcoords[] = {
+		0.5f / cols,  0.5f / rows,
+		( cols - 0.5f ) / cols ,  0.5f / rows,
+		( cols - 0.5f ) / cols, ( rows - 0.5f ) / rows,
+		0.5f / cols, ( rows - 0.5f ) / rows
 	};
-	GLfloat vtx[] =
-	{
-		x,     y,
-		x + w, y,
-		x + w, y + h,
-		x,     y + h
+	float vertices[] = {
+		x, y, 0.0f,
+		x+w, y, 0.0f,
+		x+w, y+h, 0.0f,
+		x, y+h, 0.0f
 	};
-	GLboolean text  = qglIsEnabled(GL_TEXTURE_COORD_ARRAY);
-	GLboolean glcol = qglIsEnabled(GL_COLOR_ARRAY);
-	if (glcol)
-	{
-		qglDisableClientState(GL_COLOR_ARRAY);
-	}
-	if (!text)
-	{
-		qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	}
-	qglEnableClientState(GL_VERTEX_ARRAY);
-	qglTexCoordPointer(2, GL_FLOAT, 0, tex);
-	qglVertexPointer(2, GL_FLOAT, 0, vtx);
-	qglDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-	if (glcol)
-	{
-		qglEnableClientState(GL_COLOR_ARRAY);
-	}
-	if (!text)
-	{
-		qglDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	}
+	
+	vglVertexPointer(3, GL_FLOAT, 0, 4, vertices);
+	vglTexCoordPointer(2, GL_FLOAT, 0, 4, texcoords);
+	vglDrawObjects(GL_TRIANGLE_FAN, 4, GL_TRUE);
 }
 
 /**
@@ -941,7 +923,7 @@ void RE_UploadCinematic(int w, int h, int cols, int rows, const byte *data, int 
 	{
 		tr.scratchImage[client]->width  = tr.scratchImage[client]->uploadWidth = cols;
 		tr.scratchImage[client]->height = tr.scratchImage[client]->uploadHeight = rows;
-		qglTexImage2D(GL_TEXTURE_2D, 0, 3, cols, rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		qglTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, cols, rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -953,7 +935,7 @@ void RE_UploadCinematic(int w, int h, int cols, int rows, const byte *data, int 
 		{
 			// otherwise, just subimage upload it so that drivers can tell we are going to be changing
 			// it and don't try and do a texture compression
-			qglTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, cols, rows, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			qglTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, cols, rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
 		}
 	}
 }
@@ -1339,19 +1321,7 @@ void RB_ShowImages(void)
 
 	start = ri.Milliseconds();
 	// OpenGLES Implementation
-	GLboolean text  = qglIsEnabled(GL_TEXTURE_COORD_ARRAY);
-	GLboolean glcol = qglIsEnabled(GL_COLOR_ARRAY);
-	if (glcol)
-	{
-		qglDisableClientState(GL_COLOR_ARRAY);
-	}
-	if (!text)
-	{
-		qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	}
-
-	for (i = 0 ; i < tr.numImages ; i++)
-	{
+	for ( i = 0 ; i < tr.numImages ; i++ ) {
 		image = tr.images[i];
 
 		w = glConfig.vidWidth / 40;
@@ -1361,42 +1331,30 @@ void RB_ShowImages(void)
 		y = i / 30 * h;
 
 		// show in proportional size in mode 2
-		if (r_showImages->integer == 2)
-		{
+		if ( r_showImages->integer == 2 ) {
 			w *= image->uploadWidth / 512.0f;
 			h *= image->uploadHeight / 512.0f;
 		}
 
-		// OpenGLES Implementation
-		GLfloat tex[] =
-		{
-			0, 0,
-			1, 0,
-			1, 1,
-			0, 1
+		GL_Bind( image );
+
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	
+		float texcoord[] = {
+			0, 0, 1, 0, 1, 1, 0, 1
 		};
-		GLfloat vtx[] =
-		{
-			x,     y,
-			x + w, y,
-			x + w, y + h,
-			x,     y + h
+		float vertex[] = {
+			x, y, 0.0f,
+			x+w, y, 0.0f,
+			x+w, y+h, 0.0f,
+			x, y+h, 0.0f
 		};
-		qglTexCoordPointer(2, GL_FLOAT, 0, tex);
-		qglVertexPointer(2, GL_FLOAT, 0, vtx);
-		qglDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
+	
+		vglVertexPointer(3, GL_FLOAT, 0, 4, vertex);
+		vglTexCoordPointer(2, GL_FLOAT, 0, 4, texcoord);
+		vglDrawObjects(GL_TRIANGLE_FAN, 4, GL_TRUE);
 	}
 
-	if (glcol)
-	{
-		qglEnableClientState(GL_COLOR_ARRAY);
-	}
-	if (!text)
-	{
-		qglDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
-	}
 
 	qglFinish();
 
@@ -1527,7 +1485,7 @@ const void *RB_RenderToTexture(const void *data)
 	GL_Bind(cmd->image);
 	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_LINEAR);
 	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINEAR);
-	qglCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, cmd->x, cmd->y, cmd->w, cmd->h, 0);
+	//qglCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, cmd->x, cmd->y, cmd->w, cmd->h, 0);
 	//qglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, cmd->x, cmd->y, cmd->w, cmd->h );
 
 	return ( const void * ) (cmd + 1);

@@ -31,6 +31,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vitasdk.h>
 #include "vitaGL.h"
 
+void GLimp_SetGamma( unsigned char red[256], unsigned char green[256], unsigned char blue[256] )
+{
+}
+
 /*
 ===============
 GLimp_Shutdown
@@ -92,37 +96,122 @@ typedef struct vidmode_s
 	int width, height;
 	float pixelAspect;		// pixel width / height
 } vidmode_t;
-extern vidmode_t r_vidModes[];
+vidmode_t r_vidModes[] =
+{
+	{ "Mode  0: 480x272",		480,	272,	1 },
+	{ "Mode  1: 640x368",		640,	368,	1 },
+	{ "Mode  2: 720x408",		720,	408,	1 },
+	{ "Mode  3: 960x544",		960,	544,	1 },
+	{ "Mode  4: 960x544",		960,	544,	1 },
+	{ "Mode  5: 960x544",		960,	544,	1 },
+	{ "Mode  6: 960x544",		960,	544,	1 },
+	{ "Mode  7: 960x544",		960,	544,	1 },
+	{ "Mode  8: 960x544",		960,	544,	1 },
+	{ "Mode  9: 960x544",		960,	544,	1 },
+	{ "Mode 10: 960x544",		960,	544,	1 },
+	{ "Mode 11: 960x544", 		960, 	544, 	1 },
+	{ "Mode 12:   640x360  (16:9)",     640,     360,    1 },
+	{ "Mode 13:   640x400 (16:10)",     640,     400,    1 },
+	{ "Mode 14:   800x450  (16:9)",     800,     450,    1 },
+	{ "Mode 15:   800x500 (16:10)",     800,     500,    1 },
+	{ "Mode 16:  1024x640 (16:10)",    1024,     640,    1 },
+	{ "Mode 17:  1024x576  (16:9)",    1024,     576,    1 },
+	{ "Mode 18:  1280x720  (16:9)",    1280,     720,    1 },
+	{ "Mode 19:  1280x768 (16:10)",    1280,     768,    1 },
+	{ "Mode 20:  1280x800 (16:10)",    1280,     800,    1 },
+	{ "Mode 21:  1280x960   (4:3)",    1280,     960,    1 },
+	{ "Mode 22:  1440x900 (16:10)",    1440,     900,    1 },
+	{ "Mode 23:  1600x900  (16:9)",    1600,     900,    1 },
+	{ "Mode 24: 1600x1000 (16:10)",    1600,    1000,    1 },
+	{ "Mode 25: 1680x1050 (16:10)",    1680,    1050,    1 },
+	{ "Mode 26: 1920x1080  (16:9)",    1920,    1080,    1 },
+	{ "Mode 27: 1920x1200 (16:10)",    1920,    1200,    1 },
+	{ "Mode 28: 1920x1440   (4:3)",    1920,    1440,    1 },
+	{ "Mode 29: 2560x1600 (16:10)",    2560,    1600,    1 }
+};
 
 uint32_t cur_width;
 
-void GLimp_Init( qboolean coreContext)
+cvar_t *r_allowSoftwareGL; // Don't abort out if a hardware visual can't be obtained
+cvar_t *r_allowResize; // make window resizable
+
+// Window cvars
+cvar_t *r_fullscreen = 0;
+cvar_t *r_noBorder;
+cvar_t *r_centerWindow;
+cvar_t *r_customwidth;
+cvar_t *r_customheight;
+cvar_t *r_swapInterval;
+cvar_t *r_mode;
+cvar_t *r_customaspect;
+cvar_t *r_displayRefresh;
+cvar_t *r_windowLocation;
+
+// Window surface cvars
+cvar_t *r_stencilbits;  // number of desired stencil bits
+cvar_t *r_depthbits;  // number of desired depth bits
+cvar_t *r_colorbits;  // number of desired color bits, only relevant for fullscreen
+cvar_t *r_ignorehwgamma;
+cvar_t *r_ext_multisample;
+
+static void GLimp_InitCvars(void)
+{
+	//r_sdlDriver = Cvar_Get("r_sdlDriver", "", CVAR_ROM);
+	r_allowSoftwareGL = Cvar_Get("r_allowSoftwareGL", "0", CVAR_LATCH);
+	r_allowResize     = Cvar_Get("r_allowResize", "0", CVAR_ARCHIVE);
+
+	// Window cvars
+	r_fullscreen     = Cvar_Get("r_fullscreen", "1", CVAR_ARCHIVE | CVAR_LATCH);
+	r_noBorder       = Cvar_Get("r_noborder", "0", CVAR_ARCHIVE | CVAR_LATCH);
+	r_centerWindow   = Cvar_Get("r_centerWindow", "0", CVAR_ARCHIVE | CVAR_LATCH);
+	r_customwidth    = Cvar_Get("r_customwidth", "1280", CVAR_ARCHIVE | CVAR_LATCH);
+	r_customheight   = Cvar_Get("r_customheight", "720", CVAR_ARCHIVE | CVAR_LATCH);
+	r_swapInterval   = Cvar_Get("r_swapInterval", "0", CVAR_ARCHIVE);
+	r_mode           = Cvar_Get("r_mode", "-2", CVAR_ARCHIVE | CVAR_LATCH | CVAR_UNSAFE);
+	r_customaspect   = Cvar_Get("r_customaspect", "1", CVAR_ARCHIVE | CVAR_LATCH);
+	r_displayRefresh = Cvar_Get("r_displayRefresh", "0", CVAR_LATCH);
+	Cvar_CheckRange(r_displayRefresh, 0, 240, qtrue);
+	r_windowLocation = Cvar_Get("r_windowLocation", "0,-1,-1", CVAR_ARCHIVE | CVAR_PROTECTED);
+
+	// Window render surface cvars
+	r_stencilbits     = Cvar_Get("r_stencilbits", "0", CVAR_ARCHIVE | CVAR_LATCH | CVAR_UNSAFE);
+	r_depthbits       = Cvar_Get("r_depthbits", "0", CVAR_ARCHIVE | CVAR_LATCH | CVAR_UNSAFE);
+	r_colorbits       = Cvar_Get("r_colorbits", "0", CVAR_ARCHIVE | CVAR_LATCH | CVAR_UNSAFE);
+	r_ignorehwgamma   = Cvar_Get("r_ignorehwgamma", "0", CVAR_ARCHIVE | CVAR_LATCH | CVAR_UNSAFE);
+	r_ext_multisample = Cvar_Get("r_ext_multisample", "0", CVAR_ARCHIVE | CVAR_LATCH | CVAR_UNSAFE);
+	Cvar_CheckRange(r_ext_multisample, 0, 4, qtrue);
+
+	// Old modes (these are used by the UI code)
+	Cvar_Get("r_oldFullscreen", "", CVAR_ARCHIVE);
+	Cvar_Get("r_oldMode", "", CVAR_ARCHIVE);
+}
+
+void GLimp_Init(glconfig_t *glConfig, windowContext_t *context)
 {
 	
 	if (r_mode->integer < 0) r_mode->integer = 3;
 	
-	glConfig.vidWidth = r_vidModes[r_mode->integer].width;
-	glConfig.vidHeight = r_vidModes[r_mode->integer].height;
-	glConfig.colorBits = 32;
-	glConfig.depthBits = 32;
-	glConfig.stencilBits = 8;
-	glConfig.displayFrequency = 60;
-	glConfig.stereoEnabled = qfalse;
+	glConfig->vidWidth = r_vidModes[r_mode->integer].width;
+	glConfig->vidHeight = r_vidModes[r_mode->integer].height;
+	glConfig->colorBits = 32;
+	glConfig->depthBits = 32;
+	glConfig->stencilBits = 8;
+	glConfig->displayFrequency = 60;
 	
-	glConfig.driverType = GLDRV_ICD;
-	glConfig.hardwareType = GLHW_GENERIC;
-	glConfig.deviceSupportsGamma = qfalse;
-	glConfig.textureCompression = TC_NONE;
-	glConfig.textureEnvAddAvailable = qfalse;
-	glConfig.windowAspect = ((float)r_vidModes[r_mode->integer].width) / ((float)r_vidModes[r_mode->integer].height);
-	glConfig.isFullscreen = qtrue;
+	glConfig->driverType = GLDRV_ICD;
+	glConfig->hardwareType = GLHW_GENERIC;
+	glConfig->deviceSupportsGamma = qfalse;
+	glConfig->textureCompression = TC_NONE;
+	glConfig->textureEnvAddAvailable = qfalse;
+	glConfig->windowAspect = ((float)r_vidModes[r_mode->integer].width) / ((float)r_vidModes[r_mode->integer].height);
+	glConfig->isFullscreen = qtrue;
 	
 	if (!inited){
-		vglInitExtended(0x10000, glConfig.vidWidth, glConfig.vidHeight, 0x2000000, SCE_GXM_MULTISAMPLE_4X);
+		vglInitExtended(0x10000, glConfig->vidWidth, glConfig->vidHeight, 0x2000000, SCE_GXM_MULTISAMPLE_4X);
 		vglUseVram(GL_TRUE);
 		inited = 1;
-		cur_width = glConfig.vidWidth;
-	}else if (glConfig.vidWidth != cur_width){ // Changed resolution in game, restarting the game
+		cur_width = glConfig->vidWidth;
+	}else if (glConfig->vidWidth != cur_width){ // Changed resolution in game, restarting the game
 		sceAppMgrLoadExec("app0:/eboot.bin", NULL, NULL);
 	}
 	vglStartRendering();
@@ -142,10 +231,10 @@ void GLimp_Init( qboolean coreContext)
 	gColorBuffer = gColorBufferPtr;
 	gTexCoordBuffer = gTexCoordBufferPtr;
 	
-	strncpy(glConfig.vendor_string, glGetString(GL_VENDOR), sizeof(glConfig.vendor_string));
-	strncpy(glConfig.renderer_string, glGetString(GL_RENDERER), sizeof(glConfig.renderer_string));
-	strncpy(glConfig.version_string, glGetString(GL_VERSION), sizeof(glConfig.version_string));
-	strncpy(glConfig.extensions_string, glGetString(GL_EXTENSIONS), sizeof(glConfig.extensions_string));
+	strncpy(glConfig->vendor_string, glGetString(GL_VENDOR), sizeof(glConfig->vendor_string));
+	strncpy(glConfig->renderer_string, glGetString(GL_RENDERER), sizeof(glConfig->renderer_string));
+	strncpy(glConfig->version_string, glGetString(GL_VERSION), sizeof(glConfig->version_string));
+	strncpy(glConfig->extensions_string, glGetString(GL_EXTENSIONS), sizeof(glConfig->extensions_string));
 	
 	qglClearColor( 0, 0, 0, 1 );
 	qglClear( GL_COLOR_BUFFER_BIT );

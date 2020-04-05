@@ -48,8 +48,7 @@
  */
 static void R_DrawElements(int numIndexes, const glIndex_t *indexes)
 {
-	qglDrawElements(GL_TRIANGLES, numIndexes, GL_INDEX_TYPE, indexes);
-	return;
+	vglDrawObjects(GL_TRIANGLES, numIndexes, GL_TRUE);
 }
 
 /*
@@ -274,13 +273,24 @@ static void DrawMultitextured(shaderCommands_t *input, int stage)
 
 	// base
 	GL_SelectTexture(0);
-	qglTexCoordPointer(2, GL_FLOAT, 0, input->svars.texcoords[0]);
+	float *texcoord = gTexCoordBuffer;
+	int i;
+	for (i = 0 ; i < input->numIndexes ; i++) {
+		memcpy(gTexCoordBuffer, input->svars.texcoords[0][input->indexes[i]], sizeof(vec2_t));
+		gTexCoordBuffer += 2;
+	}
+	vglTexCoordPointerMapped(texcoord);
 	R_BindAnimatedImage(&pStage->bundle[0]);
-
+	R_DrawElements( input->numIndexes, input->indexes );
+	
 	// lightmap/secondary pass
 	GL_SelectTexture(1);
-	qglEnable(GL_TEXTURE_2D);
-	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	texcoord = gTexCoordBuffer;
+	for (i = 0 ; i < input->numIndexes ; i++) {
+		memcpy(gTexCoordBuffer, input->svars.texcoords[1][input->indexes[i]], sizeof(vec2_t));
+		gTexCoordBuffer += 2;
+	}
+	vglTexCoordPointerMapped(texcoord);
 
 	if (r_lightMap->integer)
 	{
@@ -291,15 +301,13 @@ static void DrawMultitextured(shaderCommands_t *input, int stage)
 		GL_TexEnv(tess.shader->multitextureEnv);
 	}
 
-	qglTexCoordPointer(2, GL_FLOAT, 0, input->svars.texcoords[1]);
-
 	R_BindAnimatedImage(&pStage->bundle[1]);
 
 	R_DrawElements(input->numIndexes, input->indexes);
 
 	// disable texturing on TEXTURE1, then select TEXTURE0
 	//qglDisableClientState( GL_TEXTURE_COORD_ARRAY );
-	qglDisable(GL_TEXTURE_2D);
+	//qglDisable(GL_TEXTURE_2D);
 
 	GL_SelectTexture(0);
 }

@@ -92,6 +92,16 @@ void IN_RescaleAnalog(int *x, int *y, int dead) {
 
 int old_x = - 1, old_y;
 
+char *IN_GetClipboardData(void)
+{
+	return NULL;
+}
+
+qboolean IN_IsNumLockDown(void)
+{
+	return qfalse;
+}
+
 void IN_Frame( void )
 {
 	SceCtrlData keys;
@@ -149,7 +159,7 @@ void IN_Frame( void )
 IN_Init
 ===============
 */
-void IN_Init( void *windowData )
+void IN_Init()
 {
 	sceCtrlSetSamplingMode(SCE_CTRL_MODE_ANALOG_WIDE);
 	sceTouchSetSamplingState(SCE_TOUCH_PORT_FRONT, SCE_TOUCH_SAMPLING_STATE_START);

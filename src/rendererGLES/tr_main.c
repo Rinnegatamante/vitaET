@@ -84,10 +84,10 @@ void R_Fog(glfog_t *curfog)
 	{
 		curfog->density = 1;
 	}
-	if (!curfog->hint)
+	/*if (!curfog->hint)
 	{
 		curfog->hint = GL_DONT_CARE;
-	}
+	}*/
 	if (!curfog->mode)
 	{
 		curfog->mode = GL_LINEAR;
@@ -101,7 +101,7 @@ void R_Fog(glfog_t *curfog)
 
 	qglFogf(GL_FOG_DENSITY, curfog->density);
 
-	qglHint(GL_FOG_HINT, curfog->hint);
+//	qglHint(GL_FOG_HINT, curfog->hint);
 
 	qglFogf(GL_FOG_START, curfog->start);
 
@@ -216,7 +216,7 @@ void R_SetFog(int fogvar, int var1, int var2, float r, float g, float b, float d
 			glfogsettings[fogvar].clearscreen = qfalse;
 			glfogsettings[fogvar].density     = density;
 		}
-		glfogsettings[fogvar].hint       = GL_DONT_CARE;
+//		glfogsettings[fogvar].hint       = GL_DONT_CARE;
 		glfogsettings[fogvar].registered = qtrue;
 
 		return;

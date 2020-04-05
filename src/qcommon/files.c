@@ -36,6 +36,8 @@
  * https://www.securecoding.cert.org/confluence/display/c/FIO19-C.+Do+not+use+fseek%28%29+and+ftell%28%29+to+compute+the+size+of+a+regular+file
  */
 
+#include <vitasdk.h>
+
 #include "q_shared.h"
 #include "qcommon.h"
 
@@ -43,11 +45,11 @@
 #include "./crypto/sha-1/sha1.h"
 #endif
 
-#ifdef BUNDLED_MINIZIP
+//#ifdef BUNDLED_MINIZIP
 #    include "unzip.h"
-#else
-#    include <unzip.h>
-#endif
+//#else
+//#    include <unzip.h>
+//#endif
 
 #ifdef _WIN32
 #define realpath(N, R) _fullpath((R), (N), _MAX_PATH)
@@ -1906,7 +1908,7 @@ int FS_DeleteDir(const char *dirname, qboolean nonEmpty, qboolean recursive)
 
 	ospath = FS_BuildOSPath(fs_homepath->string, fs_gamedir, dirname);
 
-	if (Q_rmdir(ospath) == 0)
+	if (sceIoRmdir(ospath) == 0)
 	{
 		return 1;
 	}
@@ -3342,6 +3344,7 @@ int FS_PathCmp(const char *s1, const char *s2)
  * @param[in] s1 path A
  * @param[in] s2 path B
  */
+ /*
 qboolean FS_IsSamePath(const char *s1, const char *s2)
 {
 	char *res1, *res2;
@@ -3361,7 +3364,7 @@ qboolean FS_IsSamePath(const char *s1, const char *s2)
 	Com_Dealloc(res1);
 	Com_Dealloc(res2);
 	return qfalse;
-}
+}*/
 
 /**
  * @brief FS_SortFileList
@@ -4233,7 +4236,7 @@ static void FS_Startup(const char *gameName)
 #ifndef DEDICATED
 	// clients: don't start if base == home, so downloads won't overwrite original files! DO NOT CHANGE!
 	//if (FS_PathCmp(fs_homepath->string, fs_basepath->string) == 0)
-	if (FS_IsSamePath(fs_homepath->string, fs_basepath->string))
+//	if (FS_IsSamePath(fs_homepath->string, fs_basepath->string))
 	{
 		Com_Error(ERR_FATAL, "FS_Startup: fs_homepath and fs_basepath are equal - set different paths!");
 	}

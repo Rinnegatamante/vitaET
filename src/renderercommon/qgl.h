@@ -36,8 +36,16 @@
 #ifndef INCLUDE_QGL_H
 #define INCLUDE_QGL_H
 
+#define MAX_INDICES 4096
+#define VERTEXARRAYSIZE 18360
+extern float *gVertexBuffer;
+extern uint8_t *gColorBuffer;
+extern uint8_t *gColorBuffer255;
+extern float *gTexCoordBuffer;
+extern uint16_t *indices;
+
 #ifdef FEATURE_RENDERER_GLES
-#   include <GLES/gl.h>
+#   include <vitaGL.h>
 #else
 #   ifdef BUNDLED_GLEW
 #       include "GL/glew.h"
@@ -180,20 +188,20 @@ extern void (*glUnlockArraysEXT)(void);
 #define qglClearAccum glClearAccum
 #define qglClearColor glClearColor
 
-#ifdef FEATURE_RENDERER_GLES
+/*#ifdef FEATURE_RENDERER_GLES
 #   define qglClearDepth glClearDepthf
-#else
+#else*/
 #   define qglClearDepth glClearDepth
-#endif // FEATURE_RENDERER_GLES
+//#endif // FEATURE_RENDERER_GLES
 
 #define qglClearIndex glClearIndex
 #define qglClearStencil glClearStencil
 
-#ifdef FEATURE_RENDERER_GLES
+/*#ifdef FEATURE_RENDERER_GLES
 #   define qglClipPlane glClipPlanef
-#else
+#else*/
 #   define qglClipPlane glClipPlane
-#endif // FEATURE_RENDERER_GLES
+//#endif // FEATURE_RENDERER_GLES
 
 #define qglColor3b glColor3b
 #define qglColor3bv glColor3bv
@@ -404,11 +412,11 @@ extern void (*glUnlockArraysEXT)(void);
 #define qglNormal3sv glNormal3sv
 #define qglNormalPointer glNormalPointer
 
-#ifdef FEATURE_RENDERER_GLES
+/*#ifdef FEATURE_RENDERER_GLES
 #   define qglOrtho glOrthof
-#else
+#else*/
 #   define qglOrtho glOrtho
-#endif // FEATURE_RENDERER_GLES
+//#endif // FEATURE_RENDERER_GLES
 
 #define qglPassThrough glPassThrough
 #define qglPixelMapfv glPixelMapfv
