@@ -49,7 +49,9 @@ void log2file(const char *format, ...) {
 	va_end(arg);
 	int i;
 	sprintf(msg, "%s\n", msg);
-	CON_Print(msg);
+	FILE* f = fopen("ux0:data/ETLegacy/log.txt", "a+");
+	fwrite(msg, 1, strlen(msg), f);
+	fclose(f);
 }
 
 #ifndef RELEASE
