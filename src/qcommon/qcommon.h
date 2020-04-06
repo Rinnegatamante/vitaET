@@ -1355,7 +1355,7 @@ qboolean IN_IsNumLockDown(void);
 #elif __APPLE__
 #define Sys_GetDLLName(x) x DLL_EXT
 #else
-#define Sys_GetDLLName(x) x ".mp.suprx"
+#define Sys_GetDLLName(x) x ".mp.arm.suprx"
 #endif
 
 qboolean Sys_DllExtension(const char *name);
