@@ -859,7 +859,7 @@ static void Upload32(unsigned *data,
         break;
 	default:*/
 		//internalFormat = GL_RGBA;
-		qglTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaledBuffer);
+		qglTexImage2D(GL_TEXTURE_2D, 0, internalFormat, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaledBuffer);
 //		break;
 //	}
 
@@ -872,7 +872,7 @@ static void Upload32(unsigned *data,
 
 	if (mipmap)
 	{
-		glGenerateMipmap(GL_TEXTURE_2D);
+		//glGenerateMipmap(GL_TEXTURE_2D);
 		/*if (textureFilterAnisotropic)
 		{
 			qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT,
@@ -978,19 +978,19 @@ image_t *R_CreateImage(const char *name, const byte *pic, int width, int height,
 	image->wrapClampMode = wrapClampMode;
 
 	// lightmaps are always allocated on TMU 1
-	if (qglActiveTextureARB && isLightmap)
+	/*if (qglActiveTextureARB && isLightmap)
 	{
 		image->TMU = 1;
 	}
-	else
+	else*/
 	{
 		image->TMU = 0;
 	}
 
-	if (qglActiveTextureARB)
+	/*if (qglActiveTextureARB)
 	{
 		GL_SelectTexture(image->TMU);
-	}
+	}*/
 
 	GL_Bind(image);
 
@@ -1008,10 +1008,10 @@ image_t *R_CreateImage(const char *name, const byte *pic, int width, int height,
 
 	qglBindTexture(GL_TEXTURE_2D, 0);
 
-	if (image->TMU == 1)
+	/*if (image->TMU == 1)
 	{
 		GL_SelectTexture(0);
-	}
+	}*/
 
 	hash            = generateHashValue(name);
 	image->next     = hashTable[hash];
@@ -1485,14 +1485,14 @@ void R_DeleteTextures(void)
 	tr.numImages = 0;
 
 	Com_Memset(glState.currenttextures, 0, sizeof(glState.currenttextures));
-	if (qglActiveTextureARB)
+	/*if (qglActiveTextureARB)
 	{
 		GL_SelectTexture(1);
 		qglBindTexture(GL_TEXTURE_2D, 0);
 		GL_SelectTexture(0);
 		qglBindTexture(GL_TEXTURE_2D, 0);
 	}
-	else
+	else*/
 	{
 		qglBindTexture(GL_TEXTURE_2D, 0);
 	}
