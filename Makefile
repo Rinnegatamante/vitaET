@@ -26,7 +26,7 @@ CFLAGS  = $(INCLUDE) -D__PSP2__ -D__FLOAT_WORD_ORDER=1 -D__GNU__ -DFEATURE_MULTI
         -DUSE_ICON -DARCH_STRING=\"arm\" -DBOTLIB -DUSE_CODEC_VORBIS \
         -DPRODUCT_VERSION=\"1.36_GIT_ba68b99c-2018-01-23\" -DHAVE_VM_COMPILED=true \
         -mfpu=neon -mcpu=cortex-a9 -fsigned-char -DFEATURE_RENDERER_GLES \
-        -Wl,-q -O2 -ftree-vectorize -g -ffast-math -fno-short-enums
+        -Wl,-q -O2 -ftree-vectorize -g -ffast-math -fno-short-enums -DRELEASE
 CXXFLAGS  = $(CFLAGS) -fno-exceptions -std=gnu++11 -fpermissive
 ASFLAGS = $(CFLAGS)
 
