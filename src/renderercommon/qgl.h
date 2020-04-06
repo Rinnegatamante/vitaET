@@ -36,7 +36,7 @@
 #ifndef INCLUDE_QGL_H
 #define INCLUDE_QGL_H
 
-#define MAX_INDICES 4096
+#define MAX_INDICES 9500
 #define VERTEXARRAYSIZE 18360
 extern float *gVertexBuffer;
 extern uint8_t *gColorBuffer;
