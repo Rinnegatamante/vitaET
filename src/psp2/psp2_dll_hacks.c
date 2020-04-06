@@ -29,7 +29,7 @@ void _fini( void ) { }
 void _init( void ) { }
 
 // small heap for internal libc use
-unsigned int _newlib_heap_size_user = 2 * 1024 * 1024;
+unsigned int _newlib_heap_size_user = 1 * 1024 * 1024;
 
 //////////////////////////////////////
 
