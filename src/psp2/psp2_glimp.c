@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <stdlib.h>
 #include <math.h>
 
-#include "../renderer/tr_local.h"
+#include "../rendererGLES/tr_local.h"
 #include "../sys/sys_local.h"
 
 #include <vitasdk.h>
@@ -209,8 +209,9 @@ void GLimp_Init(glconfig_t *glConfig, windowContext_t *context)
 	glConfig->isFullscreen = qtrue;
 	
 	if (!inited){
-		vglInitExtended(0x10000, glConfig->vidWidth, glConfig->vidHeight, 0x2000000, SCE_GXM_MULTISAMPLE_4X);
+		vglInitExtended(0x10000, glConfig->vidWidth, glConfig->vidHeight, 1 * 1024 * 1024, SCE_GXM_MULTISAMPLE_4X);
 		vglUseVram(GL_TRUE);
+		vglUseExtraMem(GL_FALSE);
 		inited = 1;
 		cur_width = glConfig->vidWidth;
 	}else if (glConfig->vidWidth != cur_width){ // Changed resolution in game, restarting the game
@@ -224,11 +225,11 @@ void GLimp_Init(glconfig_t *glConfig, windowContext_t *context)
 	}
 	vglIndexPointerMapped(indices);
 	glEnableClientState(GL_VERTEX_ARRAY);
-	gVertexBufferPtr = (float*)malloc(0x200000);
-	gColorBufferPtr = (uint8_t*)malloc(0x100000);
-	gTexCoordBufferPtr = (float*)malloc(0x100000);
-	gColorBuffer255 = (uint8_t*)malloc(0x3000);
-	memset(gColorBuffer255, 0xFF, 0x3000);
+	gVertexBufferPtr = (float*)malloc(0x800000);
+	gColorBufferPtr = (uint8_t*)malloc(0x200000);
+	gTexCoordBufferPtr = (float*)malloc(0x400000);
+	gColorBuffer255 = (uint8_t*)malloc(0x6000);
+	memset(gColorBuffer255, 0xFF, 0x6000);
 	gVertexBuffer = gVertexBufferPtr;
 	gColorBuffer = gColorBufferPtr;
 	gTexCoordBuffer = gTexCoordBufferPtr;
