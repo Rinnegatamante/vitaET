@@ -990,10 +990,10 @@ void R_Register(void)
 #endif
 
 	// latched and archived variables
-	r_allowExtensions       = ri.Cvar_Get("r_allowExtensions", "1", CVAR_ARCHIVE | CVAR_LATCH | CVAR_UNSAFE);
-	r_extCompressedTextures = ri.Cvar_Get("r_ext_compressed_textures", "1", CVAR_ARCHIVE | CVAR_LATCH | CVAR_UNSAFE);
-	r_extMultitexture       = ri.Cvar_Get("r_ext_multitexture", "1", CVAR_ARCHIVE | CVAR_LATCH | CVAR_UNSAFE);
-	r_extTextureEnvAdd      = ri.Cvar_Get("r_ext_texture_env_add", "1", CVAR_ARCHIVE | CVAR_LATCH);
+	r_allowExtensions       = ri.Cvar_Get("r_allowExtensions", "0", CVAR_ARCHIVE | CVAR_LATCH | CVAR_UNSAFE);
+	r_extCompressedTextures = ri.Cvar_Get("r_ext_compressed_textures", "0", CVAR_ARCHIVE | CVAR_LATCH | CVAR_UNSAFE);
+	r_extMultitexture       = ri.Cvar_Get("r_ext_multitexture", "0", CVAR_ARCHIVE | CVAR_LATCH | CVAR_UNSAFE);
+	r_extTextureEnvAdd      = ri.Cvar_Get("r_ext_texture_env_add", "0", CVAR_ARCHIVE | CVAR_LATCH);
 
 	r_extTextureFilterAnisotropic = ri.Cvar_Get("r_ext_texture_filter_anisotropic", "0", CVAR_ARCHIVE | CVAR_LATCH | CVAR_UNSAFE);
 	r_extMaxAnisotropy            = ri.Cvar_Get("r_ext_max_anisotropy", "2", CVAR_ARCHIVE | CVAR_LATCH);
@@ -1035,9 +1035,9 @@ void R_Register(void)
 	r_fastSky        = ri.Cvar_Get("r_fastsky", "0", CVAR_ARCHIVE);
 
 	r_drawSun      = ri.Cvar_Get("r_drawSun", "1", CVAR_ARCHIVE);
-	r_dynamicLight = ri.Cvar_Get("r_dynamiclight", "1", CVAR_ARCHIVE);
+	r_dynamicLight = ri.Cvar_Get("r_dynamiclight", "0", CVAR_ARCHIVE);
 	r_finish       = ri.Cvar_Get("r_finish", "0", CVAR_ARCHIVE);
-	r_textureMode  = ri.Cvar_Get("r_textureMode", "GL_LINEAR_MIPMAP_NEAREST", CVAR_ARCHIVE);
+	r_textureMode  = ri.Cvar_Get("r_textureMode", "GL_LINEAR", CVAR_ARCHIVE);
 	r_gamma        = ri.Cvar_Get("r_gamma", "1.3", CVAR_ARCHIVE);
 
 	r_facePlaneCull = ri.Cvar_Get("r_facePlaneCull", "1", CVAR_ARCHIVE);
@@ -1068,7 +1068,7 @@ void R_Register(void)
 	r_cacheGathering = ri.Cvar_Get("cl_cacheGathering", "0", 0);
 	r_bonesDebug     = ri.Cvar_Get("r_bonesDebug", "0", CVAR_CHEAT);
 
-	r_wolfFog = ri.Cvar_Get("r_wolffog", "1", CVAR_ARCHIVE);
+	r_wolfFog = ri.Cvar_Get("r_wolffog", "0", CVAR_ARCHIVE);
 
 	r_noCurves    = ri.Cvar_Get("r_nocurves", "0", CVAR_CHEAT);
 	r_drawWorld   = ri.Cvar_Get("r_drawworld", "1", CVAR_CHEAT);
