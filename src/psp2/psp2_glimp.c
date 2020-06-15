@@ -31,6 +31,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vitasdk.h>
 #include "vitaGL.h"
 
+#define GXM_PARAM_BUF_SIZE 16 * 1024 * 1024
+
 void GLimp_SetGamma( unsigned char red[256], unsigned char green[256], unsigned char blue[256] )
 {
 }
@@ -209,7 +211,18 @@ void GLimp_Init(glconfig_t *glConfig, windowContext_t *context)
 	glConfig->isFullscreen = qtrue;
 	
 	if (!inited){
-		vglInitExtended(0x10000, glConfig->vidWidth, glConfig->vidHeight, 1 * 1024 * 1024, SCE_GXM_MULTISAMPLE_4X);
+		SceKernelFreeMemorySizeInfo info;
+		info.size = sizeof(SceKernelFreeMemorySizeInfo);
+		sceKernelGetFreeMemorySize(&info);
+		Ren_Print("Mem state: RAM: 0x%08X, CDRAM: 0x%08X, PHYCONT: 0x%08X\n", info.size_user, info.size_cdram, info.size_phycont);
+		
+		vglInitWithCustomSizes(0x10000, glConfig->vidWidth, glConfig->vidHeight, 1 * 1024 * 1024, info.size_cdram - 256 * 1024 - GXM_PARAM_BUF_SIZE, info.size_phycont - 1 * 1024 * 1024, SCE_GXM_MULTISAMPLE_4X);
+		Ren_Print("vitaGL initialized successfully!\n");
+		
+		info.size = sizeof(SceKernelFreeMemorySizeInfo);
+		sceKernelGetFreeMemorySize(&info);
+		Ren_Print("Mem state: RAM: 0x%08X, CDRAM: 0x%08X, PHYCONT: 0x%08X\n", info.size_user, info.size_cdram, info.size_phycont);
+		
 		vglUseVram(GL_TRUE);
 		vglUseExtraMem(GL_FALSE);
 		inited = 1;
