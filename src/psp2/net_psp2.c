@@ -46,33 +46,6 @@ typedef int	ioctlarg_t;
 #include <psp2/net/net.h>
 #include <sys/select.h>
 
-#define INADDR_BROADCAST SCE_NET_INADDR_BROADCAST
-#define INADDR_ANY SCE_NET_INADDR_ANY
-
-struct sockaddr_storage {
-    uint8_t ss_len;
-    sa_family_t ss_family;
-    char ss_padding[128];
-};
-
-struct addrinfo {
-    int              ai_flags;
-    int              ai_family;
-    int              ai_socktype;
-    int              ai_protocol;
-    socklen_t        ai_addrlen;
-    struct sockaddr *ai_addr;
-    char            *ai_canonname;
-    struct addrinfo *ai_next;
-};
-
-int getaddrinfo(const char *node, const char *service,
-                const struct addrinfo *hints,
-                struct addrinfo **res) {
-
-    return -11; // EAI_SYSTEM
-}
-
 void freeaddrinfo(struct addrinfo *res) {
 
 }
@@ -81,7 +54,6 @@ const char *gai_strerror(int errcode) {
     return "";
 }
 
-#define NI_NUMERICHOST 0
 int getnameinfo(const struct sockaddr *sa, socklen_t salen,
                 char *host, size_t hostlen,
                 char *serv, size_t servlen, int flags) {
