@@ -68,7 +68,7 @@ cvar_t *cl_maxpackets;
 cvar_t *cl_packetdup;
 cvar_t *cl_timeNudge;
 cvar_t *cl_showTimeDelta;
-cvar_t *cl_freezeDemo;
+extern cvar_t *cl_freezeDemo;
 
 cvar_t *cl_shownet = NULL;      // This is referenced in msg.c and we need to make sure it is NULL
 cvar_t *cl_shownuments;

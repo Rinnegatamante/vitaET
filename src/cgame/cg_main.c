@@ -35,6 +35,7 @@
 
 #include "cg_local.h"
 
+lagometer_t lagometer;
 displayContextDef_t cgDC;
 
 void CG_Init(int serverMessageNum, int serverCommandSequence, int clientNum, qboolean demoPlayback, int legacyClient, demoPlayInfo_t *info, int clientVersion);

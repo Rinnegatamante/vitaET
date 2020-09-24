@@ -6,9 +6,9 @@ SOURCES  := src/rendererGLES src/qcommon src/botlib src/client src/server src/ps
 CPPSOURCES := code/splines
 INCLUDES := src/rendererGLES src/qcommon src/botlib src/client src/server src/psp2 src/sys src/renderercommon
 
-LIBS = -lvitaGL -lvorbisfile -lvorbis -logg  -lspeexdsp -lmpg123 -lcurl -lssl -lcrypto \
+LIBS = -lvitaGL -lvitashark -lvorbisfile -lvorbis -logg  -lspeexdsp -lmpg123 -lcurl -lssl -lcrypto \
 	-lc -lSceCommonDialog_stub -lSceAudio_stub -lSceLibKernel_stub -lSceSsl_stub \
-	-lSceNet_stub -lSceNetCtl_stub -lpng -lz -lSceDisplay_stub -lSceGxm_stub \
+	-lSceNet_stub -lSceNetCtl_stub -lpng -lz -lSceDisplay_stub -lSceGxm_stub -lSceShaccCg_stub \
 	-lSceSysmodule_stub -lSceCtrl_stub -lSceTouch_stub -lSceMotion_stub -lm -lSceAppMgr_stub \
 	-lSceAppUtil_stub -lScePgf_stub -ljpeg -lSceRtc_stub -lScePower_stub -lmathneon
 

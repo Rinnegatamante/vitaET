@@ -126,8 +126,8 @@ cvar_t *com_altivec;
 #endif
 cvar_t *cl_paused;
 cvar_t *sv_paused;
-cvar_t *cl_packetdelay;
-cvar_t *sv_packetdelay;
+extern cvar_t *cl_packetdelay;
+extern cvar_t *sv_packetdelay;
 
 cvar_t *com_motd;
 cvar_t *com_motdString;
