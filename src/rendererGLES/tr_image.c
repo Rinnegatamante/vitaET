@@ -669,7 +669,7 @@ static void Upload32(unsigned *data,
 	int      scaled_width, scaled_height;
 	int      c;
 	byte     *scan;
-	GLenum   internalFormat = GL_RGB;
+	GLenum   internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 
 	// convert to exact power of 2 sizes
 	for (scaled_width = 1 ; scaled_width < width ; scaled_width <<= 1)
@@ -728,75 +728,6 @@ static void Upload32(unsigned *data,
 	c       = width * height;
 	scan    = ((byte *)data);
 	samples = 3;
-
-	if (lightMap)
-	{
-		if (r_greyScale->integer)
-		{
-			internalFormat = GL_LUMINANCE;
-		}
-		else
-		{
-			internalFormat = GL_RGB;
-		}
-	}
-	else
-	{
-		float rMax = 0, gMax = 0, bMax = 0;
-		int   i;
-
-		for (i = 0; i < c; i++)
-		{
-			if (scan[i * 4 + 0] > rMax)
-			{
-				rMax = scan[i * 4 + 0];
-			}
-			if (scan[i * 4 + 1] > gMax)
-			{
-				gMax = scan[i * 4 + 1];
-			}
-			if (scan[i * 4 + 2] > bMax)
-			{
-				bMax = scan[i * 4 + 2];
-			}
-			if (scan[i * 4 + 3] != 255)
-			{
-				samples = 4;
-				break;
-			}
-		}
-		// select proper internal format
-		if (samples == 3)
-		{
-			if (r_greyScale->integer)
-			{
-				internalFormat = GL_LUMINANCE;
-			}
-/*			else if (r_textureBits->integer == 16)
-			{
-				internalFormat = GL_RGB5;
-			}*/
-			else
-			{
-				internalFormat = GL_RGB;
-			}
-		}
-		else if (samples == 4)
-		{
-			if (r_greyScale->integer)
-			{
-				internalFormat = GL_LUMINANCE_ALPHA;
-			}
-/*			else if (r_textureBits->integer == 16)
-			{
-				internalFormat = GL_RGBA4;
-			}*/
-			else
-			{
-				internalFormat = GL_RGBA;
-			}
-		}
-	}
 
 	//*pformat = GL_RGBA;
 	if ((scaled_width == width) &&
