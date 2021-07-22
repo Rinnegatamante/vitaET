@@ -909,19 +909,16 @@ image_t *R_CreateImage(const char *name, const byte *pic, int width, int height,
 	image->wrapClampMode = wrapClampMode;
 
 	// lightmaps are always allocated on TMU 1
-	/*if (qglActiveTextureARB && isLightmap)
+	if (isLightmap)
 	{
 		image->TMU = 1;
 	}
-	else*/
+	else
 	{
 		image->TMU = 0;
 	}
 
-	/*if (qglActiveTextureARB)
-	{
-		GL_SelectTexture(image->TMU);
-	}*/
+	GL_SelectTexture(image->TMU);
 
 	GL_Bind(image);
 
@@ -939,10 +936,10 @@ image_t *R_CreateImage(const char *name, const byte *pic, int width, int height,
 
 	qglBindTexture(GL_TEXTURE_2D, 0);
 
-	/*if (image->TMU == 1)
+	if (image->TMU == 1)
 	{
 		GL_SelectTexture(0);
-	}*/
+	}
 
 	hash            = generateHashValue(name);
 	image->next     = hashTable[hash];

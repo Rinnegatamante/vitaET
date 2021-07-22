@@ -885,14 +885,11 @@ void GL_SetDefaultState(void)
 
 	// initialize downstream texture unit if we're running
 	// in a multitexture environment
-	/*if (qglActiveTextureARB)
-	{
-		GL_SelectTexture(1);
-		GL_TextureMode(r_textureMode->string);
-		GL_TexEnv(GL_MODULATE);
-		qglDisable(GL_TEXTURE_2D);
-		GL_SelectTexture(0);
-	}*/
+	GL_SelectTexture(1);
+	GL_TextureMode(r_textureMode->string);
+	GL_TexEnv(GL_MODULATE);
+	qglDisable(GL_TEXTURE_2D);
+	GL_SelectTexture(0);
 
 	qglEnable(GL_TEXTURE_2D);
 	GL_TextureMode(r_textureMode->string);
@@ -968,7 +965,7 @@ void GfxInfo_f(void)
 	Ren_Print("texturemode: %s\n", r_textureMode->string);
 	Ren_Print("picmip: %d\n", r_picMip->integer);
 	Ren_Print("texture bits: %d\n", r_textureBits->integer);
-	Ren_Print("multitexture: %s\n", enablestrings[qglActiveTextureARB != 0]);
+	Ren_Print("multitexture: %s\n", enablestrings[/*qglActiveTextureARB != */1]);
 	Ren_Print("texenv add: %s\n", enablestrings[glConfig.textureEnvAddAvailable != 0]);
 	Ren_Print("compressed textures: %s\n", enablestrings[glConfig.textureCompression != TC_NONE]);
 

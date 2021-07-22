@@ -96,24 +96,20 @@ void GL_SelectTexture(int unit)
 		return;
 	}
 
-	/*if (unit == 0)
+	if (unit == 0)
 	{
-		qglActiveTextureARB(GL_TEXTURE0_ARB);
-		Ren_LogComment("glActiveTextureARB( GL_TEXTURE0_ARB )\n");
-		qglClientActiveTextureARB(GL_TEXTURE0_ARB);
-		Ren_LogComment("glClientActiveTextureARB( GL_TEXTURE0_ARB )\n");
+		glActiveTexture(GL_TEXTURE0);
+		glClientActiveTexture(GL_TEXTURE0);
 	}
 	else if (unit == 1)
 	{
-		qglActiveTextureARB(GL_TEXTURE1_ARB);
-		Ren_LogComment("glActiveTextureARB( GL_TEXTURE1_ARB )\n");
-		qglClientActiveTextureARB(GL_TEXTURE1_ARB);
-		Ren_LogComment("glClientActiveTextureARB( GL_TEXTURE1_ARB )\n");
+		glActiveTexture(GL_TEXTURE1);
+		glClientActiveTexture(GL_TEXTURE1);
 	}
 	else
 	{
 		Ren_Drop("GL_SelectTexture: unit = %i", unit);
-	}*/
+	}
 
 	glState.currenttmu = unit;
 }

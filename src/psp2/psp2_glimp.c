@@ -31,8 +31,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vitasdk.h>
 #include "vitaGL.h"
 
-#define GXM_PARAM_BUF_SIZE 16 * 1024 * 1024
-
 void GLimp_SetGamma( unsigned char red[256], unsigned char green[256], unsigned char blue[256] )
 {
 }
@@ -85,7 +83,6 @@ of OpenGL
 uint16_t* indices;
 float *gVertexBuffer;
 uint8_t *gColorBuffer;
-uint8_t *gColorBuffer255;
 float *gTexCoordBuffer;
 float *gVertexBufferPtr;
 uint8_t *gColorBufferPtr;
@@ -205,33 +202,21 @@ void GLimp_Init(glconfig_t *glConfig, windowContext_t *context)
 	glConfig->driverType = GLDRV_ICD;
 	glConfig->hardwareType = GLHW_GENERIC;
 	glConfig->deviceSupportsGamma = qfalse;
-	glConfig->textureCompression = TC_NONE;
-	glConfig->textureEnvAddAvailable = qfalse;
+	glConfig->textureCompression = TC_S3TC;
+	glConfig->textureEnvAddAvailable = qtrue;
 	glConfig->windowAspect = ((float)r_vidModes[r_mode->integer].width) / ((float)r_vidModes[r_mode->integer].height);
 	glConfig->isFullscreen = qtrue;
 	
 	if (!inited){
-		SceKernelFreeMemorySizeInfo info;
-		info.size = sizeof(SceKernelFreeMemorySizeInfo);
-		sceKernelGetFreeMemorySize(&info);
-		Ren_Print("Mem state: RAM: 0x%08X, CDRAM: 0x%08X, PHYCONT: 0x%08X\n", info.size_user, info.size_cdram, info.size_phycont);
-		
-		vglEnableRuntimeShaderCompiler(GL_FALSE);
-		vglInitWithCustomSizes(0x10000, glConfig->vidWidth, glConfig->vidHeight, 1 * 1024 * 1024, info.size_cdram - 256 * 1024 - GXM_PARAM_BUF_SIZE, info.size_phycont - 1 * 1024 * 1024, SCE_GXM_MULTISAMPLE_4X);
+		vglInitExtended(0x10000, glConfig->vidWidth, glConfig->vidHeight, 0x2000000, SCE_GXM_MULTISAMPLE_4X);
 		Ren_Print("vitaGL initialized successfully!\n");
 		
-		info.size = sizeof(SceKernelFreeMemorySizeInfo);
-		sceKernelGetFreeMemorySize(&info);
-		Ren_Print("Mem state: RAM: 0x%08X, CDRAM: 0x%08X, PHYCONT: 0x%08X\n", info.size_user, info.size_cdram, info.size_phycont);
-		
 		vglUseVram(GL_TRUE);
-		vglUseExtraMem(GL_FALSE);
 		inited = 1;
 		cur_width = glConfig->vidWidth;
 	}else if (glConfig->vidWidth != cur_width){ // Changed resolution in game, restarting the game
 		sceAppMgrLoadExec("app0:/eboot.bin", NULL, NULL);
 	}
-	vglStartRendering();
 	int i;
 	indices = (uint16_t*)malloc(sizeof(uint16_t)*MAX_INDICES);
 	for (i=0;i<MAX_INDICES;i++){
@@ -239,11 +224,9 @@ void GLimp_Init(glconfig_t *glConfig, windowContext_t *context)
 	}
 	vglIndexPointerMapped(indices);
 	glEnableClientState(GL_VERTEX_ARRAY);
-	gVertexBufferPtr = (float*)malloc(0x800000);
-	gColorBufferPtr = (uint8_t*)malloc(0x200000);
-	gTexCoordBufferPtr = (float*)malloc(0x400000);
-	gColorBuffer255 = (uint8_t*)malloc(0x6000);
-	memset(gColorBuffer255, 0xFF, 0x6000);
+	gVertexBufferPtr = (float*)malloc(0x100000);
+	gColorBufferPtr = (uint8_t*)malloc(0x100000);
+	gTexCoordBufferPtr = (float*)malloc(0x100000);
 	gVertexBuffer = gVertexBufferPtr;
 	gColorBuffer = gColorBufferPtr;
 	gTexCoordBuffer = gTexCoordBufferPtr;
@@ -268,8 +251,7 @@ Responsible for doing a swapbuffers
 */
 void GLimp_EndFrame( void )
 {
-	vglStopRendering();
-	vglStartRendering();
+	vglSwapBuffers(GL_FALSE);
 	vglIndexPointerMapped(indices);
 	gVertexBuffer = gVertexBufferPtr;
 	gColorBuffer = gColorBufferPtr;

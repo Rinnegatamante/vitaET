@@ -48,7 +48,7 @@
  */
 static void R_DrawElements(int numIndexes, const glIndex_t *indexes)
 {
-	vglDrawObjects(GL_TRIANGLES, numIndexes, GL_TRUE);
+	glDrawElements( GL_TRIANGLES, numIndexes, GL_INDEX_TYPE, indexes );
 }
 
 /*
@@ -276,45 +276,39 @@ static void DrawMultitextured(shaderCommands_t *input, int stage)
 
 	GL_State(pStage->stateBits);
 
+	//
 	// base
-	GL_SelectTexture(0);
-	float *texcoord = gTexCoordBuffer;
-	int i;
-	for (i = 0 ; i < input->numIndexes ; i++) {
-		memcpy(gTexCoordBuffer, input->svars.texcoords[0][input->indexes[i]], sizeof(vec2_t));
-		gTexCoordBuffer += 2;
-	}
-	vglTexCoordPointerMapped(texcoord);
-	R_BindAnimatedImage(&pStage->bundle[0]);
-	R_DrawElements( input->numIndexes, input->indexes );
-	
+	//
+	GL_SelectTexture( 0 );
+	qglTexCoordPointer( 2, GL_FLOAT, 0, input->svars.texcoords[0] );
+	R_BindAnimatedImage( &pStage->bundle[0] );
+
+	//
 	// lightmap/secondary pass
-	GL_SelectTexture(1);
-	texcoord = gTexCoordBuffer;
-	for (i = 0 ; i < input->numIndexes ; i++) {
-		memcpy(gTexCoordBuffer, input->svars.texcoords[1][input->indexes[i]], sizeof(vec2_t));
-		gTexCoordBuffer += 2;
-	}
-	vglTexCoordPointerMapped(texcoord);
+	//
+	GL_SelectTexture( 1 );
+	qglEnable( GL_TEXTURE_2D );
+	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
 
-	if (r_lightMap->integer)
-	{
-		GL_TexEnv(GL_REPLACE);
-	}
-	else
-	{
-		GL_TexEnv(tess.shader->multitextureEnv);
+	if ( r_lightMap->integer ) {
+		GL_TexEnv( GL_REPLACE );
+	} else {
+		GL_TexEnv( tess.shader->multitextureEnv );
 	}
 
-	R_BindAnimatedImage(&pStage->bundle[1]);
+	qglTexCoordPointer( 2, GL_FLOAT, 0, input->svars.texcoords[1] );
 
-	R_DrawElements(input->numIndexes, input->indexes);
+	R_BindAnimatedImage( &pStage->bundle[1] );
 
+	R_DrawElements( input->numIndexes, input->indexes );
+
+	//
 	// disable texturing on TEXTURE1, then select TEXTURE0
+	//
 	//qglDisableClientState( GL_TEXTURE_COORD_ARRAY );
-	//qglDisable(GL_TEXTURE_2D);
+	qglDisable( GL_TEXTURE_2D );
 
-	GL_SelectTexture(0);
+	GL_SelectTexture( 0 );
 }
 
 /**
@@ -456,12 +450,7 @@ static void DynamicLightSinglePass(void)
 	//    intColors[ hitIndexes[ i ] ] = 0x000000FF;
 
 	qglEnableClientState(GL_COLOR_ARRAY);
-	uint8_t *colorbuf = gColorBuffer;
-	for (i = 0 ; i < numIndexes ; i++) {
-		memcpy(gColorBuffer, tess.svars.colors[hitIndexes[i]], sizeof(uint32_t));
-		gColorBuffer += 4;
-	}
-	vglColorPointerMapped(GL_UNSIGNED_BYTE, colorbuf);
+	qglColorPointer(4, GL_UNSIGNED_BYTE, 0, tess.svars.colors);
 
 	// render the dynamic light pass
 	R_FogOff();
@@ -618,12 +607,7 @@ static void DynamicLightPass(void)
 		//  intColors[ hitIndexes[ i ] ] = 0x000000FF;
 
 		qglEnableClientState(GL_COLOR_ARRAY);
-		uint8_t *colorbuf = gColorBuffer;
-		for (i = 0 ; i < numIndexes ; i++) {
-			memcpy(gColorBuffer, tess.svars.colors[hitIndexes[i]], sizeof(uint32_t));
-			gColorBuffer += 4;
-		}
-		vglColorPointerMapped(GL_UNSIGNED_BYTE, colorbuf);
+		qglColorPointer(4, GL_UNSIGNED_BYTE, 0, tess.svars.colors);
 
 		R_FogOff();
 		GL_Bind(tr.whiteImage);
@@ -658,18 +642,10 @@ static void RB_FogPass(void)
 	}
 
 	qglEnableClientState(GL_COLOR_ARRAY);
-	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	qglColorPointer(4, GL_UNSIGNED_BYTE, 0, tess.svars.colors);
 
-	float *texcoord = gTexCoordBuffer;
-	uint8_t *colorbuf = gColorBuffer;
-	for (i = 0 ; i < tess.numIndexes ; i++) {
-		memcpy(gTexCoordBuffer, tess.svars.texcoords[0][tess.indexes[i]], sizeof(vec2_t));
-		gTexCoordBuffer += 2;
-		memcpy(gColorBuffer, tess.svars.colors[tess.indexes[i]], sizeof(uint32_t));
-		gColorBuffer += 4;
-	}
-	vglColorPointerMapped(GL_UNSIGNED_BYTE, colorbuf);
-	vglTexCoordPointerMapped(texcoord);
+	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	qglTexCoordPointer(2, GL_FLOAT, 0, tess.svars.texcoords[0]);
 
 	fog = tr.world->fogs + tess.fogNum;
 
@@ -1184,10 +1160,11 @@ static void RB_IterateStagesGeneric(shaderCommands_t *input)
 		ComputeColors(pStage);
 		ComputeTexCoords(pStage);
 
-//		if (!setArraysOnce)
-//		{
+		if (!setArraysOnce)
+		{
 			qglEnableClientState(GL_COLOR_ARRAY);
-//		}
+			qglColorPointer(4, GL_UNSIGNED_BYTE, 0, input->svars.colors);
+		}
 
 		// do multitexture
 		if (pStage->bundle[1].image[0] != 0)
@@ -1198,24 +1175,10 @@ static void RB_IterateStagesGeneric(shaderCommands_t *input)
 		{
 			int fadeStart;
 
-//			if (!setArraysOnce)
-//			{
-				float *texcoord = gTexCoordBuffer;
-				float *vertices = gVertexBuffer;
-				uint8_t *colorbuf = gColorBuffer;
-				int i;
-				for (i = 0 ; i < input->numIndexes ; i++) {
-					memcpy(gTexCoordBuffer, input->svars.texcoords[0][input->indexes[i]], sizeof(vec2_t));
-					memcpy(gColorBuffer, input->svars.colors[input->indexes[i]], sizeof(uint32_t));
-					memcpy(gVertexBuffer, input->xyz[input->indexes[i]], sizeof(vec3_t));
-					gVertexBuffer += 3;
-					gColorBuffer += 4;
-					gTexCoordBuffer += 2;
-				}
-				vglColorPointerMapped(GL_UNSIGNED_BYTE, colorbuf);
-				vglTexCoordPointerMapped(texcoord);
-				vglVertexPointerMapped(vertices);
-//			}
+			if (!setArraysOnce)
+			{
+				qglTexCoordPointer(2, GL_FLOAT, 0, input->svars.texcoords[0]);
+			}
 
 			// set state
 			R_BindAnimatedImage(&pStage->bundle[0]);
@@ -1325,6 +1288,29 @@ void RB_StageIteratorGeneric(void)
 		qglPolygonOffset(r_offsetFactor->value, r_offsetUnits->value);
 	}
 
+	// if there is only a single pass then we can enable color
+	// and texture arrays before we compile, otherwise we need
+	// to avoid compiling those arrays since they will change
+	// during multipass rendering
+	if (tess.numPasses > 1 || shader->multitextureEnv)
+	{
+		setArraysOnce = qfalse;
+		qglDisableClientState(GL_COLOR_ARRAY);
+		qglDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	}
+	else
+	{
+		setArraysOnce = qtrue;
+
+		qglEnableClientState(GL_COLOR_ARRAY);
+		qglColorPointer(4, GL_UNSIGNED_BYTE, 0, tess.svars.colors);
+
+		qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		qglTexCoordPointer(2, GL_FLOAT, 0, tess.svars.texcoords[0]);
+	}
+
+	qglVertexPointer(3, GL_FLOAT, 16, input->xyz);   // padded for SIMD
+
 	// enable color and texcoord arrays after the lock if necessary
 	if (!setArraysOnce)
 	{
@@ -1383,24 +1369,13 @@ void RB_StageIteratorVertexLitTexture(void)
 	// set face culling appropriately
 	GL_Cull(shader->cullType);
 
-	//
 	// set arrays and lock
-	//
-	uint8_t *colorbuf = gColorBuffer;
-	float *texcoord = gTexCoordBuffer;
-	float *vertices = gVertexBuffer;
-	int i;
-	for (i = 0 ; i < tess.numIndexes ; i++) {
-		memcpy(gColorBuffer, tess.svars.colors[tess.indexes[i]], sizeof(uint32_t));
-		gColorBuffer += 4;
-		memcpy(gTexCoordBuffer, tess.texCoords[tess.indexes[i]][0], sizeof(vec2_t));
-		gTexCoordBuffer += 2;
-		memcpy(gVertexBuffer, input->xyz[input->indexes[i]], sizeof(vec3_t));
-		gVertexBuffer += 3;
-	}
-	vglColorPointerMapped(GL_UNSIGNED_BYTE, colorbuf);
-	vglTexCoordPointerMapped(texcoord);
-	vglVertexPointerMapped(vertices);
+	qglEnableClientState(GL_COLOR_ARRAY);
+	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+	qglColorPointer(4, GL_UNSIGNED_BYTE, 0, tess.svars.colors);
+	qglTexCoordPointer(2, GL_FLOAT, 16, tess.texCoords[0][0]);
+	qglVertexPointer(3, GL_FLOAT, 16, input->xyz);
 
 	// call special shade routine
 	R_BindAnimatedImage(&tess.xstages[0]->bundle[0]);
@@ -1447,33 +1422,25 @@ void RB_StageIteratorLightmappedMultitexture(void)
 	// set face culling appropriately
 	GL_Cull(shader->cullType);
 
-	//
 	// set color, pointers, and lock
-	//
-	GL_State( GLS_DEFAULT );
-	qglEnableClientState( GL_COLOR_ARRAY );
-	vglColorPointerMapped(GL_UNSIGNED_BYTE, gColorBuffer255);
+	GL_State(GLS_DEFAULT);
+	qglVertexPointer(3, GL_FLOAT, 16, input->xyz);
+
+#ifdef REPLACE_MODE
+	qglDisableClientState(GL_COLOR_ARRAY);
+	qglColor3f(1, 1, 1);
+	qglShadeModel(GL_FLAT);
+#else
+	qglEnableClientState(GL_COLOR_ARRAY);
+	qglColorPointer(4, GL_UNSIGNED_BYTE, 0, tess.constantColor255);
+#endif
 
 	// select base stage
 	GL_SelectTexture(0);
 
-	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
-	R_BindAnimatedImage( &tess.xstages[0]->bundle[0] );
-	int i;
-	float *texcoord = gTexCoordBuffer;
-	float *vertices = gVertexBuffer;
-	float *texcoord2 = gTexCoordBuffer + tess.numIndexes * 2;
-	for (i = 0 ; i < tess.numIndexes ; i++) {
-		memcpy(gTexCoordBuffer, tess.texCoords[tess.indexes[i]][0], sizeof(vec2_t));
-		memcpy(texcoord2, tess.texCoords[tess.indexes[i]][1], sizeof(vec2_t));
-		memcpy(gVertexBuffer, tess.xyz[tess.indexes[i]], sizeof(vec3_t));
-		gTexCoordBuffer += 2;
-		texcoord2 += 2;
-		gVertexBuffer += 3;
-	}
-	vglTexCoordPointerMapped(texcoord);
-	vglVertexPointerMapped(vertices);
-	R_DrawElements( input->numIndexes, input->indexes );
+	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	R_BindAnimatedImage(&tess.xstages[0]->bundle[0]);
+	qglTexCoordPointer(2, GL_FLOAT, 16, tess.texCoords[0][0]);
 
 	// configure second stage
 	GL_SelectTexture(1);
@@ -1497,8 +1464,12 @@ void RB_StageIteratorLightmappedMultitexture(void)
 		R_BindAnimatedImage(&tess.xstages[0]->bundle[1]);
 	}
 
-	vglTexCoordPointerMapped(gTexCoordBuffer);
-	gTexCoordBuffer = texcoord2;
+	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	qglTexCoordPointer(2, GL_FLOAT, 16, tess.texCoords[0][1]);
+
+#ifdef __ANDROID__
+	qglDrawArrays(GL_POINTS, 0, input->numVertexes);
+#endif
 
 	R_DrawElements(input->numIndexes, input->indexes);
 
